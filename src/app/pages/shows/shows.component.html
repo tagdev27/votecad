@@ -1,0 +1,179 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Card stats -->
+            <div class="row">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt--7">
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">{{ display_users ? 'Shows/Events' : 'Add a new Event'}}</h3>
+                </div>
+                <div class="card-body">
+
+                    <nb-card>
+
+                        <nb-card-body *ngIf="display_users">
+                            <ng2-smart-table [settings]="settings" [source]="source" (create)="addUser()"
+                                (edit)="editUser($event)" (delete)="deleteUser($event)">
+                            </ng2-smart-table>
+                        </nb-card-body>
+
+                        <nb-card-body *ngIf="!display_users">
+                            <form>
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <label class="label">Event/Show Background Image (Recommended size: 1300 by
+                                                500) *</label>
+                                            <div class="form-group">
+                                                <ngx-file-picker [adapter]="adapter" [enableCropper]="false"
+                                                    uploadType="single" fileMaxCount="1" fileMaxSize="0.29297"
+                                                    [fileExtensions]="['jpg', 'jpeg', 'png']" [showeDragDropZone]="true"
+                                                    [showPreviewContainer]="true"
+                                                    (validationError)="onValidationError($event)"
+                                                    (fileAdded)="onFileAdded($event, 'background')">
+                                                </ngx-file-picker>
+                                            </div>
+                                            <br>
+                                        </div>
+                                        <div class="col-lg">
+                                            <label class="label">Event/Show Preview Image (Recommended size: 400 by
+                                                600) *</label>
+                                            <div class="form-group">
+                                                <ngx-file-picker [adapter]="adapter" [enableCropper]="false"
+                                                    uploadType="single" fileMaxCount="1" fileMaxSize="0.29297"
+                                                    [fileExtensions]="['jpg', 'jpeg', 'png']" [showeDragDropZone]="true"
+                                                    [showPreviewContainer]="true"
+                                                    (validationError)="onValidationError($event)"
+                                                    (fileAdded)="onFileAdded($event, 'thumb')">
+                                                </ngx-file-picker>
+                                            </div>
+                                            <br>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Name *</label>
+                                                <input type="text" class="form-control form-control-alternative"
+                                                    name="model_name" [(ngModel)]="model_name" placeholder="Event Name"
+                                                    autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="Roles">Event Category</label><br>
+                                                <select class="form-control form-control-alternative"
+                                                    [(ngModel)]="model_category" placeholder="Event Category"
+                                                    name="category" ariaLabel="category[0]" status="primary">
+                                                    <option *ngFor="let c of category" [value]="c.id">{{c.name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Start Date *</label>
+                                                <input type="date" class="form-control form-control-alternative"
+                                                    name="model_start_date" [(ngModel)]="model_start_date"
+                                                    placeholder="Event Start Date" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event End Date *</label>
+                                                <input type="date" class="form-control form-control-alternative"
+                                                    name="model_end_date" [(ngModel)]="model_end_date"
+                                                    placeholder="Event End Date" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <label class="label">Event Description *</label>
+                                        <ngx-tiny-mce (editorKeyup)="editor($event)" initValue="{{model_desc}}"></ngx-tiny-mce>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Facebook Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="efp" [(ngModel)]="model_facebook_url" value="https://"
+                                                    placeholder="Event Facebook Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Twitter Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="etp" [(ngModel)]="model_twitter_url" value="https://"
+                                                    placeholder="Event Twitter Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Instagram Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="eip" [(ngModel)]="model_instagram_url" value="https://"
+                                                    placeholder="Event Instagram Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event Youtube Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="eyp" [(ngModel)]="model_youtube_url" value="https://"
+                                                    placeholder="Event Youtube Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-sm" *ngFor="let s of model_video_urls; index as i;">
+                                            <br><a href="javascript:void(0)" class="btn btn-sm btn-info mr-4">{{s}} <i class="ni ni-fat-remove" (click)="removeLink(i)"></i></a>
+                                        </div>
+                                        <!-- <div class="col-lg">
+                                            <button class="btn btn-danger" (click)="removeLink(i)">remove url</button>
+                                        </div> -->
+                                        <!-- <div class="col-lg"></div> -->
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <label class="label" for="account_name">Add Youtube Video Link</label>
+                                            <input type="url" class="form-control form-control-alternative" name="vurl"
+                                                [(ngModel)]="youtube_video_link" value="https://"
+                                                placeholder="Youtube Video Link" autofocus status="primary">
+                                        </div>
+                                        <div class="col-lg">
+                                            <br>
+                                            <button class="btn btn-success" (click)="addVideoLink()">add url</button>
+                                        </div>
+                                        <div class="col-lg"></div>
+                                    </div>
+                                    <br><br>
+                                    <button [disabled]="button_pressed" class="btn btn-success"
+                                        (click)="registerUser()">
+                                        {{!button_pressed ? 'Submit' : 'Saving...'}}
+                                    </button>
+                                    <button [disabled]="button_pressed" class="btn btn-danger"
+                                        (click)="cancelAddUser()">Cancel</button>
+
+                                </div>
+                            </form>
+                        </nb-card-body>
+                    </nb-card>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

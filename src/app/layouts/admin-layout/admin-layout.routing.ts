@@ -10,6 +10,8 @@ import { RolesComponent } from 'src/app/settings/roles/roles.component';
 import { RouteGuard } from 'src/app/route.guard';
 import { CategoryComponent } from 'src/app/settings/category/category.component';
 import { SlidersComponent } from 'src/app/settings/sliders/sliders.component';
+import { ShowsComponent } from 'src/app/pages/shows/shows.component';
+import { PeopleComponent } from 'src/app/pages/people/people.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
@@ -31,6 +33,16 @@ export const AdminLayoutRoutes: Routes = [
     {
         path: 'sliders',
         component: SlidersComponent,
+        canActivate: [RouteGuard]
+    },
+    {
+        path: 'shows',
+        component: ShowsComponent,
+        canActivate: [RouteGuard]
+    },
+    {
+        path: 'contestants',
+        component: PeopleComponent,
         canActivate: [RouteGuard]
     },
     { 

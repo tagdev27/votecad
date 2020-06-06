@@ -19,22 +19,22 @@ export class TinyMCEComponent implements OnDestroy, AfterViewInit {
    }
 
   ngAfterViewInit() {
-    // tinymce.init({
-    //   target: this.host.nativeElement,
-    //   plugins: ['link', 'paste', 'table'],
-    //   skin_url: `${this.locationStrategy.getBaseHref()}assets/skins/lightgray`,
-    //   setup: editor => {
-    //     this.editor = editor;
-    //     editor.on('keyup', () => {
-    //       this.editorKeyup.emit(editor.getContent());
-    //     });
-    //   },
-    //   height: '320',
-    // });
-    // this.editor.setContent(this.initValue)
+    tinymce.init({
+      target: this.host.nativeElement,
+      plugins: ['link', 'paste', 'table'],
+      skin_url: `${this.locationStrategy.getBaseHref()}assets/skins/lightgray`,
+      setup: editor => {
+        this.editor = editor;
+        editor.on('keyup', () => {
+          this.editorKeyup.emit(editor.getContent());
+        });
+      },
+      height: '220',
+    });
+    this.editor.setContent(this.initValue)
   }
 
   ngOnDestroy() {
-    // tinymce.remove(this.editor);
+    tinymce.remove(this.editor);
   }
 }

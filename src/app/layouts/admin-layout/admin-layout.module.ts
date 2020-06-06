@@ -28,6 +28,8 @@ import { FilePickerModule } from  'ngx-awesome-uploader';
 import { NbMenuModule, NbUserModule, NbCardModule, NbIconModule, NbInputModule, NbDialogModule, NbSelectModule, NbSpinnerModule } from '@nebular/theme';
 import { CategoryComponent } from 'src/app/settings/category/category.component';
 import { SlidersComponent } from 'src/app/settings/sliders/sliders.component';
+import { ShowsComponent } from 'src/app/pages/shows/shows.component';
+import { PeopleComponent } from 'src/app/pages/people/people.component';
 
 @NgModule({
   imports: [
@@ -61,6 +63,8 @@ import { SlidersComponent } from 'src/app/settings/sliders/sliders.component';
     RolesComponent,
     CategoryComponent,
     SlidersComponent,
+    ShowsComponent,
+    PeopleComponent,
   ],
   entryComponents: [ProgressSpinnerComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

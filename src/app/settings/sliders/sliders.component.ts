@@ -92,7 +92,7 @@ export class SlidersComponent implements OnInit {
 
     model_image = ''
     model_name = ''
-    model_url = ''
+    model_url = 'https://'
 
     selectedCatID = ''
 
@@ -107,7 +107,7 @@ export class SlidersComponent implements OnInit {
             query.forEach(data => {
                 const s = <Slider>data.data()
                 this.slider.push(s)
-                this.data.push({ 'id': `${index}`, 'userID': s.id, 'url': `<a href="${s.url}" target="_blank">${s.name}</a>`, 'name':s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'img': s.image, 'created': s.created_date, 'modified': s.modified_date })
+                this.data.push({ 'id': `${index}`, 'userID': s.id, 'url': `<a href="${s.url}" target="_blank">${s.name}</a>`, 'urlText':s.url, 'name':s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'img': s.image, 'created': s.created_date, 'modified': s.modified_date })
                 index = index + 1
             })
             this.source.load(this.data)
@@ -209,7 +209,7 @@ export class SlidersComponent implements OnInit {
         this.isAdd = false
         this.model_name = user.data.name
         this.model_image = user.data.img
-        this.model_url = user.data.url
+        this.model_url = user.data.urlText
         image_url = user.data.img
     }
 

@@ -44,7 +44,7 @@
     "nouislider": "13.1.1",
     "rxjs": "6.5.4",
     "sweetalert2": "7.22.2",
-    "tinymce": "^4.5.7",
+    "tinymce": "^4.9.10",
     "zone.js": "0.10.2"
   },
   "devDependencies": {
