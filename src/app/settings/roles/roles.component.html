@@ -1,0 +1,64 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Card stats -->
+            <div class="row">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt--7">
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">Admin Roles</h3>
+                </div>
+                <div class="card-body">
+
+                    <nb-card>
+
+                        <nb-card-body>
+                            <ng2-smart-table [settings]="settings" [source]="source" (create)="addRole()"
+                                (edit)="editRole($event)" (delete)="deleteRole($event)">
+                            </ng2-smart-table>
+                        </nb-card-body>
+                    </nb-card>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #role let-data let-ref="dialogRef">
+    <nb-card>
+        <nb-card-header *ngIf="isAddRole">Add a new role</nb-card-header>
+        <nb-card-header *ngIf="!isAddRole">Update role</nb-card-header>
+        <nb-card-body>
+            <form>
+                <div class="form-control-group">
+                    <label class="label" for="role_name">Role Name</label>
+                    <br>
+                    <input nbInput placeholder="Role Name" value="{{currentRole.name}}" name="role_nm" id="role_name"
+                        type="text" status="primary">
+                </div>
+                <div class="form-control-group">
+                    <label class="label" for="Levels">Access Levels</label><br>
+                    <nb-select multiple placeholder="Access Levels" [(selected)]="currentLevel" name="Levels"
+                        ariaLabel="levels[0]" status="primary">
+                        <nb-option *ngFor="let lv of levels" [value]="lv.value">{{lv.viewValue}}</nb-option>
+                    </nb-select>
+                </div>
+                <br>
+                <button type="submit" class="btn btn-success" *ngIf="isAddRole"
+                    (click)="roleButtonAction()">Add</button>
+                <br>
+                <button type="submit" class="btn btn-success" *ngIf="!isAddRole"
+                    (click)="roleButtonAction()">Update</button>
+            </form>
+        </nb-card-body>
+        <nb-card-footer>
+            <button class="btn btn-danger" (click)="ref.close()">Close</button>
+        </nb-card-footer>
+    </nb-card>
+</ng-template>

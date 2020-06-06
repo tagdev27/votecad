@@ -1,0 +1,62 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Card stats -->
+            <div class="row">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt--7">
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">{{ display_users ? 'Category' : 'Add a new Category'}}</h3>
+                </div>
+                <div class="card-body">
+
+                    <nb-card>
+
+                        <nb-card-body *ngIf="display_users">
+                            <ng2-smart-table [settings]="settings" [source]="source" (create)="addUser()"
+                                (edit)="editUser($event)" (delete)="deleteUser($event)">
+                            </ng2-smart-table>
+                        </nb-card-body>
+
+                        <nb-card-body *ngIf="!display_users">
+                            <form>
+                                <label class="label">Category Image (Recommended size: 300 by 300) *</label>
+                                <div class="form-group">
+                                    <ngx-file-picker [adapter]="adapter" [enableCropper]="false" uploadType="single"
+                                        fileMaxCount="1" fileMaxSize="0.09766" [fileExtensions]="['jpg', 'jpeg', 'png']"
+                                        [showeDragDropZone]="true" [showPreviewContainer]="true"
+                                        (validationError)="onValidationError($event)" (fileAdded)="onFileAdded($event)">
+                                    </ngx-file-picker>
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <label class="label" for="account_name">Category Name *</label>
+                                    <input type="text" class="form-control form-control-alternative" name="model_name"
+                                        [(ngModel)]="model_name" placeholder="Category Name" autofocus status="primary">
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="position">Category Meta (separated by comma)</label>
+                                    <input class="form-control form-control-alternative" type="text" name="model_meta"
+                                        [(ngModel)]="model_meta" placeholder="Category Meta" autofocus status="primary">
+                                </div>
+                                <br><br>
+                                <button [disabled]="button_pressed" class="btn btn-success" (click)="registerUser()">
+                                    {{!button_pressed ? 'Submit' : 'Saving...'}}
+                                </button>
+                                <button [disabled]="button_pressed" class="btn btn-danger"
+                                    (click)="cancelAddUser()">Cancel</button>
+                            </form>
+                        </nb-card-body>
+                    </nb-card>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
