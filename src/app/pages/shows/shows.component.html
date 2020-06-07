@@ -98,7 +98,8 @@
                                     <br>
                                     <div class="row">
                                         <label class="label">Event Description *</label>
-                                        <ngx-tiny-mce (editorKeyup)="editor($event)" initValue="{{model_desc}}"></ngx-tiny-mce>
+                                        <ngx-tiny-mce (editorKeyup)="editor($event)" initValue="{{model_desc}}">
+                                        </ngx-tiny-mce>
                                     </div>
                                     <br>
                                     <div class="row">
@@ -138,7 +139,8 @@
                                     <br>
                                     <div class="row">
                                         <div class="col-sm" *ngFor="let s of model_video_urls; index as i;">
-                                            <br><a href="javascript:void(0)" class="btn btn-sm btn-info mr-4">{{s}} <i class="ni ni-fat-remove" (click)="removeLink(i)"></i></a>
+                                            <br><a href="javascript:void(0)" class="btn btn-sm btn-info mr-4">{{s}} <i
+                                                    class="ni ni-fat-remove" (click)="removeLink(i)"></i></a>
                                         </div>
                                         <!-- <div class="col-lg">
                                             <button class="btn btn-danger" (click)="removeLink(i)">remove url</button>
@@ -170,6 +172,23 @@
                                 </div>
                             </form>
                         </nb-card-body>
+
+                        <div class="card shadow">
+                            <div class="card-header bg-transparent">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="text-uppercase text-muted ls-1 mb-1">VOTING ANALYSIS</h6>
+                                        <h2 class="mb-0">{{selected_event_name}}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Chart -->
+                                <div class="chart">
+                                    <canvas id="chart-orders" class="chart-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </nb-card>
 
                 </div>

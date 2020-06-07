@@ -278,7 +278,7 @@ export const parseOptions = (parent, options) => {
 				parseOptions(parent[item], options[item]);
 			}
 		}
-	}
+}
 
 export const chartExample1 = {
   options: {

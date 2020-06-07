@@ -14,6 +14,7 @@ export interface Show {
     show_end_date:string
     views:number
     link?:number
+    share_url:string
     approved: boolean
     created_by?: number//id of the agent/school
     created_date?:string

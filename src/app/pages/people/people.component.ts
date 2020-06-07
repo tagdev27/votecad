@@ -115,12 +115,15 @@ export class PeopleComponent implements OnInit {
     model_views = 0
     model_voting_count = 0
     model_vote_type = ''
+    model_link = 0
 
     editor(ev) {
         this.model_desc = ev
     }
 
     youtube_video_link = 'https://'
+    more_info_title = ''
+    more_info_value = ''
 
     selectedID = ''
     selectedPeople: People
@@ -233,6 +236,7 @@ export class PeopleComponent implements OnInit {
         this.model_views = 0
         this.model_voting_count = 0
         this.model_vote_type = ''
+        this.model_link = 0
         this.isAdd = true
         myFiles = []
         image_url = ''
@@ -244,7 +248,7 @@ export class PeopleComponent implements OnInit {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    registerUser() {
+    async registerUser() {
         if (this.isAdd) {
             if (myFiles.length == 0) {
                 this.config.displayMessage("Please enter all fields markedd with * and upload images", false)
@@ -266,6 +270,10 @@ export class PeopleComponent implements OnInit {
         this.button_pressed = true
         const key = firebase.database().ref().push().key
 
+        const link = (this.isAdd) ? this.randomInt(1, 9999999999) : this.model_link
+
+        const dynamic_link = await this.config.createDynamicLink(this.http, this.model_name, this.model_desc, `https://votecad.com/events/${this.getShowNameByID(this.model_event)}/contestant/${link}`, image_url)
+
         const people: People = {
             id: (this.isAdd) ? key : this.selectedID,
             name: this.model_name,
@@ -280,14 +288,15 @@ export class PeopleComponent implements OnInit {
             youtube_page_url: this.model_youtube_url,
             views: (this.isAdd) ? 0 : this.model_views,
             vote_type: this.model_vote_type,
+            share_url: dynamic_link['shortLink'],
             voting_counts: (this.isAdd) ? 0 : this.model_voting_count,
             approved: true,
             modified_date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
         }
         if (this.isAdd) {
-            people.link = this.randomInt(1, 9999999999)
+            people.link = link
             people.created_date = `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
-                people.created_by = this.main_user_id
+            people.created_by = this.main_user_id
             people.timestamp = firebase.firestore.FieldValue.serverTimestamp()
             firebase.firestore().collection('contestants').doc(key).set(people).then(d => {
                 this.config.logActivity(`${this.current_name}|${this.current_email} created this contestant: ${this.model_name}`)
@@ -331,6 +340,7 @@ export class PeopleComponent implements OnInit {
         this.model_views = this.selectedPeople.views
         this.model_voting_count = this.selectedPeople.voting_counts
         this.model_vote_type = this.selectedPeople.vote_type
+        this.model_link = this.selectedPeople.link
     }
 
     deleteUser(user: any) {
@@ -382,19 +392,24 @@ export class PeopleComponent implements OnInit {
     }
 
     addMoreInfo() {
-        if (this.youtube_video_link == '') {
+        if (this.more_info_title == '' || this.more_info_value == '') {
             return
         }
-        if (this.model_video_urls.includes(this.youtube_video_link)) {
-            this.config.displayMessage('Link added already', false)
+        const info = { title: this.more_info_title, value: this.more_info_value }
+        const check = this.model_more_info.filter((item, ind, arr) => {
+            return item.title == this.more_info_title && item.value == this.more_info_value
+        })
+        if (check.length > 0) {
+            this.config.displayMessage('Data added already', false)
             return
         }
-        this.model_video_urls.push(this.youtube_video_link)
-        this.youtube_video_link = 'https://'
+        this.model_more_info.push(info)
+        this.more_info_title = ''
+        this.more_info_value = ''
     }
 
     removeMoreInfo(i: number) {
-        this.model_video_urls.splice(i, 1)
+        this.model_more_info.splice(i, 1)
     }
 }
 

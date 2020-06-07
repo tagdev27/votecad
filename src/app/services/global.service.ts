@@ -1,6 +1,7 @@
 import swal from "sweetalert2";
 import * as firebase from "firebase/app";
 import 'firebase/firestore'
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 export class AppConfig {
     constructor(){}
@@ -21,5 +22,32 @@ export class AppConfig {
             'created_date': `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
             'timestamp': firebase.firestore.FieldValue.serverTimestamp()
         })
+    }
+
+    createDynamicLink(http:HttpClient, title: string, desc: string, product_link: string, image_url: string) {
+        const options = {
+            "dynamicLinkInfo": {
+                "domainUriPrefix": "votecad.page.link",
+                "link": product_link,
+                "navigationInfo": {
+                    "enableForcedRedirect": true,
+                },
+                "socialMetaTagInfo": {
+                    "socialTitle": title,
+                    "socialDescription": desc,
+                    "socialImageLink": image_url
+                },
+                "androidInfo": {
+                    "androidPackageName": "com.taconline.giftshop"
+                },
+                "iosInfo": {
+                    "iosBundleId": "com.taconline.giftshop"
+                }
+            },
+            "suffix": {
+                "option": "SHORT"
+            }
+        }
+        return http.post("https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyDjqo31awRFXohoMYEiN13ondKu8d3nsH4", options, { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) }).toPromise()
     }
 }

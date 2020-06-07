@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, TemplateRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { LocalDataSource } from 'ng2-smart-table';
 import * as firebase from "firebase/app";
 import 'firebase/firestore'
@@ -18,20 +18,67 @@ import { Observable, of } from 'rxjs';
 import { HttpRequest, HttpEvent, HttpEventType, HttpClient } from '@angular/common/http';
 import { Show } from 'src/app/models/show';
 import { Category } from 'src/app/models/category';
+import Chart from 'chart.js';
+// core components
+import {
+    chartOptions,
+    parseOptions,
+    chartExample1,
+    chartExample2
+  } from "../../variables/charts";
 
 var myFiles: FilePreviewModel[] = [];
 var background_image_url = ''
 var thumbnail_url = ''
 var selectedImageType = ''
 
+/**
+ * variables for chart visibility
+*/
+var viewChart = false
+var event_id = ''
+
+import { ViewCell } from 'ng2-smart-table';
+import { People } from 'src/app/models/contestants';
+
+@Component({
+    template: `
+  <button class="btn btn-success" (click)="viewStat()">view stat</button>
+  `,
+})
+
+export class CustomEditorComponent implements ViewCell, OnInit {
+
+    renderValue: string;
+
+    @Input() value: string | number;
+    @Input() rowData: any;
+    //@Output() 
+    public eventStat: EventEmitter<any> = new EventEmitter<any>();
+
+    ngOnInit() {
+        this.renderValue = this.value.toString();
+    }
+
+    viewStat() {
+
+        viewChart = true
+        event_id = this.renderValue
+        // console.log(this.renderValue)
+        this.eventStat.emit(this.renderValue)
+    }
+
+}
+
 @Component({
     selector: 'app-shows',
     styleUrls: ['./shows.component.scss'],
     templateUrl: './shows.component.html',
 })
-export class ShowsComponent implements OnInit {
+export class ShowsComponent implements OnInit, AfterViewInit {
 
     adapter = new DemoFilePickerAdapter(this.http);
+    @ViewChild(CustomEditorComponent) customStat;//:CustomEditorComponent = new CustomEditorComponent();
 
     settings = {
         add: {
@@ -77,6 +124,11 @@ export class ShowsComponent implements OnInit {
             modified: {
                 title: 'Modified Date',
                 type: 'string',
+            },
+            stat: {
+                title: 'View Stats',
+                type: 'html',
+                // renderComponent: CustomEditorComponent,
             }
         },
     };
@@ -116,6 +168,7 @@ export class ShowsComponent implements OnInit {
     model_youtube_url = 'https://'
     model_video_urls: string[] = []
     model_views = 0
+    model_link = 0
 
     editor(ev) {
         this.model_desc = ev
@@ -125,6 +178,14 @@ export class ShowsComponent implements OnInit {
 
     selectedID = ''
     selectedShow: Show
+
+    ngAfterViewInit() {
+        // console.log(typeof(this.customStat.eventStat))
+        // const a = 
+        // a.subscribe(val => {
+        //     console.log(`tayo == ${val}`)
+        // })
+    }
 
     constructor(private previewProgressSpinner: OverlayService, private http: HttpClient) {
     }
@@ -138,7 +199,7 @@ export class ShowsComponent implements OnInit {
                 query.forEach(data => {
                     const s = <Show>data.data()
                     this.shows.push(s)
-                    this.data.push({ 'id': `${index}`, 'category':this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                    this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'stat': s.id })
                     index = index + 1
                 })
                 this.source.load(this.data)
@@ -152,15 +213,15 @@ export class ShowsComponent implements OnInit {
             query.forEach(data => {
                 const s = <Show>data.data()
                 this.shows.push(s)
-                this.data.push({ 'id': `${index}`, 'category':this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'stat': s.id })
                 index = index + 1
             })
             this.source.load(this.data)
         })
     }
 
-    getCategoryNameByID(id:string){
-        const a = this.category.filter((item,ind,arr)=>{
+    getCategoryNameByID(id: string) {
+        const a = this.category.filter((item, ind, arr) => {
             return item.id == id
         })
         return a[0].name
@@ -178,6 +239,7 @@ export class ShowsComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.getPeopleByEventID('-M9AsKnZIttqgwNiKUCR')
         this.services.getUserData(localStorage.getItem('email')).then(user => {
             this.main_user_id = user.created_by
             this.main_user_type = user.user_type
@@ -223,6 +285,7 @@ export class ShowsComponent implements OnInit {
         this.model_youtube_url = 'https://'
         this.model_video_urls = []
         this.model_views = 0
+        this.model_link = 0
         this.isAdd = true
         myFiles = []
         background_image_url = ''
@@ -236,7 +299,7 @@ export class ShowsComponent implements OnInit {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    registerUser() {
+    async registerUser() {
         if (this.isAdd) {
             if (myFiles.length < 2) {
                 this.config.displayMessage("Please enter all fields markedd with * and upload images", false)
@@ -254,6 +317,10 @@ export class ShowsComponent implements OnInit {
         this.button_pressed = true
         const key = firebase.database().ref().push().key
 
+        const link = (this.isAdd) ? this.randomInt(1, 9999999999) : this.model_link
+
+        const dynamic_link = await this.config.createDynamicLink(this.http, this.model_name, this.model_desc, `https://votecad.com/events/${link}`, thumbnail_url)
+
         const show: Show = {
             id: (this.isAdd) ? key : this.selectedID,
             name: this.model_name,
@@ -268,12 +335,13 @@ export class ShowsComponent implements OnInit {
             youtube_page_url: this.model_youtube_url,
             show_start_date: this.model_start_date,
             show_end_date: this.model_end_date,
+            share_url: dynamic_link['shortLink'],
             views: (this.isAdd) ? 0 : this.model_views,
             approved: true,
             modified_date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
         }
         if (this.isAdd) {
-            show.link = this.randomInt(1, 9999999999)
+            show.link = link
             show.created_date = `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
                 show.created_by = this.main_user_id
             show.timestamp = firebase.firestore.FieldValue.serverTimestamp()
@@ -321,6 +389,7 @@ export class ShowsComponent implements OnInit {
         this.model_youtube_url = this.selectedShow.youtube_page_url
         this.model_video_urls = this.selectedShow.video_urls
         this.model_views = this.selectedShow.views
+        this.model_link = this.selectedShow.link
     }
 
     deleteUser(user: any) {
@@ -369,6 +438,96 @@ export class ShowsComponent implements OnInit {
 
     removeLink(i: number) {
         this.model_video_urls.splice(i, 1)
+    }
+
+    /**
+     * chart section
+     */
+    people: People[] = []
+    people_name:string[] = []
+    people_vote_count:number[] = []
+
+    selected_event_name = ''
+
+    constestantChart = {
+        options: {
+          scales: {
+            yAxes: [
+              {
+                ticks: {
+                  callback: function(value) {
+                    if (!(value % 10)) {
+                        //return '$' + value + 'k'
+                        return value;
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          tooltips: {
+            callbacks: {
+              label: function(item, data) {
+                var label = data.datasets[item.datasetIndex].label || "";
+                var yLabel = item.yLabel;
+                var content = "";
+                if (data.datasets.length > 1) {
+                  content += label;
+                }
+                content += yLabel;
+                return content;
+              }
+            }
+          }
+        },
+        // data: {
+        //   labels: ["Gisanrin Adetayo"],
+        //   datasets: [
+        //     {
+        //       label: "Contestants",
+        //       data: [1000]
+        //     }
+        //   ]
+        // }
+    }
+
+    getPeopleByEventID(id: string) {
+        firebase.firestore().collection('contestants').where('event', '==', id).get().then(query => {
+            // this.people = []
+            this.people_name = []
+            this.people_vote_count = []
+            var index = 0
+            query.forEach(data => {
+                const s = <People>data.data()
+                // this.people.push(s)
+                this.people_name.push(s.name)
+                this.people_vote_count.push(s.voting_counts)
+                index = index + 1
+            })
+            if(index == query.docs.length){
+                this.viewChart()
+            }
+        })
+    }
+
+    viewChart() {
+        const myData = {
+            labels: this.people_name,
+            datasets: [
+              {
+                label: "Contestants",
+                data: this.people_vote_count
+              }
+            ]
+        }
+        var chartOrders = document.getElementById('chart-orders');
+        parseOptions(Chart, chartOptions())
+        var ordersChart = new Chart(chartOrders, {
+            type: 'bar',
+            options: this.constestantChart.options,
+            data: myData
+        });
+        // ordersChart.update();
     }
 }
 

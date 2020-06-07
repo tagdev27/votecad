@@ -142,6 +142,42 @@
                                         </div>
                                         <div class="col-lg"></div>
                                     </div>
+                                    <br>
+                                    <div class="row" *ngFor="let s of model_more_info; index as i;">
+                                        <div class="col-lg">
+                                            <a href="javascript:void(0)"
+                                                class="btn btn-sm btn-primary mr-4">{{s.title}}</a>
+                                        </div>
+                                        <div class="col-lg">
+                                            <a href="javascript:void(0)"
+                                                class="btn btn-sm btn-success mr-4">{{s.value}}</a>
+                                        </div>
+                                        <div class="col-lg">
+                                            <button class="btn btn-danger" (click)="removeMoreInfo(i)">remove
+                                                info</button>
+                                        </div>
+                                        <br>
+                                    </div>
+                                    <br>
+                                    <div class="row">
+                                        <div class="col-lg">
+                                            <label class="label" for="account_name">Additional Information Title</label>
+                                            <input type="url" class="form-control form-control-alternative" name="ait"
+                                                [(ngModel)]="more_info_title" value="" placeholder="" autofocus
+                                                status="primary">
+                                        </div>
+                                        <div class="col-lg">
+                                            <label class="label" for="account_name">Additional Information Value</label>
+                                            <input type="url" class="form-control form-control-alternative" name="aiv"
+                                                [(ngModel)]="more_info_value" value="" placeholder="" autofocus
+                                                status="primary">
+                                        </div>
+                                        <div class="col-lg">
+                                            <br>
+                                            <button class="btn btn-success" (click)="addMoreInfo()">add info</button>
+                                        </div>
+                                        <div class="col-lg"></div>
+                                    </div>
                                     <br><br>
                                     <button [disabled]="button_pressed" class="btn btn-success"
                                         (click)="registerUser()">

@@ -14,6 +14,7 @@ export interface People {
     voting_counts: number
     vote_type: string
     link?: number
+    share_url:string
     approved: boolean
     created_by?: number//id of the agent/school
     created_date?: string
