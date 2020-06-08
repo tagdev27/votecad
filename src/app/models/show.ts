@@ -10,12 +10,17 @@ export interface Show {
     twitter_page_url:string
     instagram_page_url:string
     youtube_page_url:string
+    tiktok_page_url:string
     show_start_date:string
     show_end_date:string
     views:number
+    voting_credit?:number
     link?:number
+    avgRating?: number
+    numRatings?: number
     share_url:string
     approved: boolean
+    verified: boolean
     created_by?: number//id of the agent/school
     created_date?:string
     modified_date?:string

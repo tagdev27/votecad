@@ -25,47 +25,38 @@ import {
     parseOptions,
     chartExample1,
     chartExample2
-  } from "../../variables/charts";
+} from "../../variables/charts";
 
 var myFiles: FilePreviewModel[] = [];
 var background_image_url = ''
 var thumbnail_url = ''
 var selectedImageType = ''
 
-/**
- * variables for chart visibility
-*/
-var viewChart = false
-var event_id = ''
-
 import { ViewCell } from 'ng2-smart-table';
 import { People } from 'src/app/models/contestants';
+import { CustomQRCodeComponent } from 'src/app/components/qrcode/qrcode.component';
+
 
 @Component({
     template: `
-  <button class="btn btn-success" (click)="viewStat()">view stat</button>
+  <label class="btn btn-info" data-toggle="tooltip" data-placement="bottom" title="{{renderValue}}">
+  {{shortRenderValue}}
+</label>
   `,
 })
-
 export class CustomEditorComponent implements ViewCell, OnInit {
 
-    renderValue: string;
+    renderValue: string = '';
+    shortRenderValue: string | number = ''
+    config = new AppConfig()
 
     @Input() value: string | number;
     @Input() rowData: any;
-    //@Output() 
-    public eventStat: EventEmitter<any> = new EventEmitter<any>();
 
     ngOnInit() {
         this.renderValue = this.value.toString();
-    }
-
-    viewStat() {
-
-        viewChart = true
-        event_id = this.renderValue
+        this.shortRenderValue = this.config.shortenLargeNumber(Number(this.renderValue))
         // console.log(this.renderValue)
-        this.eventStat.emit(this.renderValue)
     }
 
 }
@@ -78,7 +69,7 @@ export class CustomEditorComponent implements ViewCell, OnInit {
 export class ShowsComponent implements OnInit, AfterViewInit {
 
     adapter = new DemoFilePickerAdapter(this.http);
-    @ViewChild(CustomEditorComponent) customStat;//:CustomEditorComponent = new CustomEditorComponent();
+    // @ViewChild(CustomEditorComponent) customStat;//:CustomEditorComponent = new CustomEditorComponent();
 
     settings = {
         add: {
@@ -92,7 +83,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             cancelButtonContent: '<i class="nb-close"></i>',
         },
         delete: {
-            deleteButtonContent: 'DELETE',
+            deleteButtonContent: 'STATS',
             confirmDelete: true,
         },
         mode: 'external',
@@ -101,6 +92,11 @@ export class ShowsComponent implements OnInit, AfterViewInit {
                 title: 'ID',
                 type: 'number',
             },
+            // qrcode: {
+            //     title: 'QR Code',
+            //     type: 'custom',
+            //     renderComponent: CustomQRCodeComponent
+            // },
             pimage: {
                 title: 'Preview Image',
                 type: 'html'
@@ -115,7 +111,24 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             },
             category: {
                 title: 'Category',
-                type: 'html',
+                type: 'string',
+            },
+            avg: {
+                title: 'Average Rating',
+                type: 'string',
+            },
+            rating: {
+                title: 'Total Ratings',
+                type: 'custom',
+                renderComponent: CustomEditorComponent
+            },
+            approved: {
+                title: 'Approved',
+                type: 'string',
+            },
+            verified: {
+                title: 'Verified',
+                type: 'string',
             },
             created: {
                 title: 'Created Date',
@@ -124,12 +137,12 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             modified: {
                 title: 'Modified Date',
                 type: 'string',
-            },
-            stat: {
-                title: 'View Stats',
-                type: 'custom',
-                renderComponent: CustomEditorComponent,
             }
+            // stat: {
+            //     title: 'View Stats',
+            //     type: 'custom',
+            //     renderComponent: CustomEditorComponent,
+            // }
         },
     };
 
@@ -155,6 +168,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
     main_user_type = ''//admin,agent,school
     main_user_role_type = ''//owner or staff
 
+    qrcode_data = ''
     model_pimage = ''
     model_bimage = ''
     model_name = ''
@@ -166,9 +180,13 @@ export class ShowsComponent implements OnInit, AfterViewInit {
     model_twitter_url = 'https://'
     model_instagram_url = 'https://'
     model_youtube_url = 'https://'
+    model_tiktok_url = 'https://'
     model_video_urls: string[] = []
     model_views = 0
     model_link = 0
+
+    model_verified = 'false'
+    model_approved = 'false'
 
     editor(ev) {
         this.model_desc = ev
@@ -178,6 +196,8 @@ export class ShowsComponent implements OnInit, AfterViewInit {
 
     selectedID = ''
     selectedShow: Show
+
+    viewStatChart = false
 
     ngAfterViewInit() {
         // console.log(typeof(this.customStat.eventStat))
@@ -199,7 +219,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
                 query.forEach(data => {
                     const s = <Show>data.data()
                     this.shows.push(s)
-                    this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'stat': s.id })
+                    this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'approved': `${s.approved}`, 'verified': `${s.verified}`, 'avg': `${s.avgRating}`, 'rating': `${s.numRatings}` })
                     index = index + 1
                 })
                 this.source.load(this.data)
@@ -213,7 +233,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             query.forEach(data => {
                 const s = <Show>data.data()
                 this.shows.push(s)
-                this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'stat': s.id })
+                this.data.push({ 'id': `${index}`, 'category': this.getCategoryNameByID(s.category), 'userID': s.id, 'name': s.name, 'pimage': `<div class="card-profile-image1"><img src="${s.thumbnail_image}" class="rounded-circle"></div>`, 'bimage': `<div class="card-profile-image1"><img src="${s.background_image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'approved': `${s.approved}`, 'verified': `${s.verified}`, 'avg': `${s.avgRating}`, 'rating': `${s.numRatings}` })
                 index = index + 1
             })
             this.source.load(this.data)
@@ -239,7 +259,6 @@ export class ShowsComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        this.getPeopleByEventID('-M9AsKnZIttqgwNiKUCR')
         this.services.getUserData(localStorage.getItem('email')).then(user => {
             this.main_user_id = user.created_by
             this.main_user_type = user.user_type
@@ -272,6 +291,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
 
     cancelAddUser() {
         this.display_users = true
+        this.qrcode_data = ''
         this.model_pimage = ''
         this.model_bimage = ''
         this.model_name = ''
@@ -283,6 +303,9 @@ export class ShowsComponent implements OnInit, AfterViewInit {
         this.model_twitter_url = 'https://'
         this.model_instagram_url = 'https://'
         this.model_youtube_url = 'https://'
+        this.model_tiktok_url = 'https://'
+        this.model_approved = 'false'
+        this.model_verified = 'false'
         this.model_video_urls = []
         this.model_views = 0
         this.model_link = 0
@@ -302,12 +325,12 @@ export class ShowsComponent implements OnInit, AfterViewInit {
     async registerUser() {
         if (this.isAdd) {
             if (myFiles.length < 2) {
-                this.config.displayMessage("Please enter all fields markedd with * and upload images", false)
+                this.config.displayMessage("Please enter all fields marked with * and upload images", false)
                 return
             }
         }
         if (this.model_name == '' || this.model_category == '' || this.model_end_date == '' || this.model_desc == '') {
-            this.config.displayMessage("Please enter all fields markedd with *.", false)
+            this.config.displayMessage("Please enter all fields marked with *.", false)
             return
         }
         if (this.model_video_urls.length == 0) {
@@ -317,7 +340,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
         this.button_pressed = true
         const key = firebase.database().ref().push().key
 
-        const link = (this.isAdd) ? this.randomInt(1, 9999999999) : this.model_link
+        const link = (this.isAdd) ? this.randomInt(1, 99999999999) : this.model_link
 
         const dynamic_link = await this.config.createDynamicLink(this.http, this.model_name, this.model_desc, `https://votecad.com/events/${link}`, thumbnail_url)
 
@@ -333,20 +356,26 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             twitter_page_url: this.model_twitter_url,
             instagram_page_url: this.model_instagram_url,
             youtube_page_url: this.model_youtube_url,
+            tiktok_page_url: this.model_tiktok_url,
             show_start_date: this.model_start_date,
             show_end_date: this.model_end_date,
             share_url: dynamic_link['shortLink'],
             views: (this.isAdd) ? 0 : this.model_views,
-            approved: true,
+            approved: (this.model_approved == 'true') ? true : false,
+            verified: (this.model_verified == 'true') ? true : false,
             modified_date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
         }
         if (this.isAdd) {
+            show.voting_credit = 0
+            show.avgRating = 0
+            show.numRatings = 0
             show.link = link
             show.created_date = `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
-                show.created_by = this.main_user_id
+            show.created_by = this.main_user_id
             show.timestamp = firebase.firestore.FieldValue.serverTimestamp()
             firebase.firestore().collection('shows').doc(key).set(show).then(d => {
                 this.config.logActivity(`${this.current_name}|${this.current_email} created this show: ${this.model_name}`)
+                this.config.counterOperations('evt', 1)
                 this.config.displayMessage(`Event created successfully.`, true);
                 this.cancelAddUser()
             }).catch(err => {
@@ -369,11 +398,12 @@ export class ShowsComponent implements OnInit, AfterViewInit {
     editUser(user: any) {
         this.selectedID = `${user.data.userID}`
         const s = this.shows.filter((item, index, arr) => {
-            return item.id = this.selectedID
+            return item.id == this.selectedID
         })
         this.selectedShow = s[0]
         this.display_users = false
         this.isAdd = false
+        this.qrcode_data = this.selectedShow.share_url
         background_image_url = this.selectedShow.background_image
         thumbnail_url = this.selectedShow.thumbnail_image
         this.model_pimage = this.selectedShow.thumbnail_image
@@ -387,41 +417,51 @@ export class ShowsComponent implements OnInit, AfterViewInit {
         this.model_twitter_url = this.selectedShow.twitter_page_url
         this.model_instagram_url = this.selectedShow.instagram_page_url
         this.model_youtube_url = this.selectedShow.youtube_page_url
+        this.model_tiktok_url = this.selectedShow.tiktok_page_url
+        this.model_approved = `${this.selectedShow.approved}`
+        this.model_verified = `${this.selectedShow.verified}`
         this.model_video_urls = this.selectedShow.video_urls
         this.model_views = this.selectedShow.views
         this.model_link = this.selectedShow.link
     }
 
+    closeChart(){
+        this.viewStatChart = false
+    }
+
     deleteUser(user: any) {
         const id = `${user.data.userID}`
-        swal({
-            title: 'Delete Alert',
-            text: 'Are you sure about deleting this show?',
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, keep it',
-            confirmButtonClass: "btn btn-success",
-            cancelButtonClass: "btn btn-danger",
-            buttonsStyling: false
-        }).then((result) => {
-            if (result.value) {
-                firebase.firestore().collection('shows').doc(id).delete().then(del => {
-                    this.config.logActivity(`${this.current_name}|${this.current_email} deleted this show: ${this.model_name}`)
-                    this.config.displayMessage("Successfully deleted", true);
-                }).catch(err => {
-                    this.config.displayMessage(`${err}`, false);
-                })
-            } else {
-                swal({
-                    title: 'Cancelled',
-                    text: 'Deletion not successful',
-                    type: 'error',
-                    confirmButtonClass: "btn btn-info",
-                    buttonsStyling: false
-                }).catch(swal.noop)
-            }
-        })
+        this.selected_event_name = user.data.name
+        this.getPeopleByEventID(id)//'-M9AsKnZIttqgwNiKUCR')
+        this.viewStatChart = true
+        // swal({
+        //     title: 'Delete Alert',
+        //     text: 'Are you sure about deleting this show?',
+        //     type: 'warning',
+        //     showCancelButton: true,
+        //     confirmButtonText: 'Yes, delete it!',
+        //     cancelButtonText: 'No, keep it',
+        //     confirmButtonClass: "btn btn-success",
+        //     cancelButtonClass: "btn btn-danger",
+        //     buttonsStyling: false
+        // }).then((result) => {
+        //     if (result.value) {
+        //         firebase.firestore().collection('shows').doc(id).delete().then(del => {
+        //             this.config.logActivity(`${this.current_name}|${this.current_email} deleted this show: ${this.model_name}`)
+        //             this.config.displayMessage("Successfully deleted", true);
+        //         }).catch(err => {
+        //             this.config.displayMessage(`${err}`, false);
+        //         })
+        //     } else {
+        //         swal({
+        //             title: 'Cancelled',
+        //             text: 'Deletion not successful',
+        //             type: 'error',
+        //             confirmButtonClass: "btn btn-info",
+        //             buttonsStyling: false
+        //         }).catch(swal.noop)
+        //     }
+        // })
     }
 
     addVideoLink() {
@@ -444,41 +484,41 @@ export class ShowsComponent implements OnInit, AfterViewInit {
      * chart section
      */
     people: People[] = []
-    people_name:string[] = []
-    people_vote_count:number[] = []
+    people_name: string[] = []
+    people_vote_count: number[] = []
 
     selected_event_name = ''
 
     constestantChart = {
         options: {
-          scales: {
-            yAxes: [
-              {
-                ticks: {
-                  callback: function(value) {
-                    if (!(value % 10)) {
-                        //return '$' + value + 'k'
-                        return value;
+            scales: {
+                yAxes: [
+                    {
+                        ticks: {
+                            callback: function (value) {
+                                if (!(value % 10)) {
+                                    //return '$' + value + 'k'
+                                    return value;
+                                }
+                            }
+                        }
                     }
-                  }
+                ]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (item, data) {
+                        var label = data.datasets[item.datasetIndex].label || "";
+                        var yLabel = item.yLabel;
+                        var content = "";
+                        if (data.datasets.length > 1) {
+                            content += label;
+                        }
+                        content += yLabel;
+                        return content;
+                    }
                 }
-              }
-            ]
-          },
-          tooltips: {
-            callbacks: {
-              label: function(item, data) {
-                var label = data.datasets[item.datasetIndex].label || "";
-                var yLabel = item.yLabel;
-                var content = "";
-                if (data.datasets.length > 1) {
-                  content += label;
-                }
-                content += yLabel;
-                return content;
-              }
             }
-          }
         },
         // data: {
         //   labels: ["Gisanrin Adetayo"],
@@ -504,7 +544,7 @@ export class ShowsComponent implements OnInit, AfterViewInit {
                 this.people_vote_count.push(s.voting_counts)
                 index = index + 1
             })
-            if(index == query.docs.length){
+            if (index == query.docs.length) {
                 this.viewChart()
             }
         })
@@ -514,10 +554,10 @@ export class ShowsComponent implements OnInit, AfterViewInit {
         const myData = {
             labels: this.people_name,
             datasets: [
-              {
-                label: "Contestants",
-                data: this.people_vote_count
-              }
+                {
+                    label: "Contestants",
+                    data: this.people_vote_count
+                }
             ]
         }
         var chartOrders = document.getElementById('chart-orders');

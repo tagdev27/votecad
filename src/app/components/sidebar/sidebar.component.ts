@@ -22,7 +22,7 @@ export const ROUTES: RouteInfo[] = [
   { path: '/sliders', title: 'Slider Settings', icon: 'ni-album-2 text-blue', class: '', access: false },
   { path: '/shows', title: 'Shows/Events', icon: 'ni-calendar-grid-58 text-blue', class: '', access: false },
   { path: '/contestants', title: 'Contestants', icon: 'ni-user-run text-blue', class: '', access: false },
-  { path: '/merchants', title: 'Merchants', icon: 'ni-circle-08 text-blue', class: '', access: false },
+  { path: '/organizers', title: 'Organizers', icon: 'ni-circle-08 text-blue', class: '', access: false },
   { path: '/users', title: 'Users', icon: 'ni-single-02 text-blue', class: '', access: false },
   { path: '/transactions', title: 'Transactions', icon: 'ni-credit-card text-blue', class: '', access: false },
   { path: '/settings', title: 'Settings', icon: 'ni-settings text-blue', class: '', access: false },

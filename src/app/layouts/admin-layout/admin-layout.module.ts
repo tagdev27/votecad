@@ -8,6 +8,7 @@ import { ClipboardModule } from 'ngx-clipboard';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
+import { QRCodeModule } from 'angularx-qrcode';
 
 import { AdminLayoutRoutes } from './admin-layout.routing';
 import { DashboardComponent } from '../../pages/dashboard/dashboard.component';
@@ -28,7 +29,7 @@ import { ProgressSpinnerModule, ProgressSpinnerComponent } from '../../progress-
 import { ThemeModule } from '../../@theme/theme.module';
 // import { NbEvaIconsModule } from "@nebular/eva-icons";
 import { FilePickerModule } from 'ngx-awesome-uploader';
-import { NbMenuModule, NbUserModule, NbCardModule, NbIconModule, NbInputModule, NbDialogModule, NbSelectModule, NbSpinnerModule } from '@nebular/theme';
+import { NbMenuModule, NbUserModule, NbTooltipModule, NbPopoverModule, NbCardModule, NbIconModule, NbInputModule, NbDialogModule, NbSelectModule, NbSpinnerModule } from '@nebular/theme';
 import { CategoryComponent } from 'src/app/settings/category/category.component';
 import { SlidersComponent } from 'src/app/settings/sliders/sliders.component';
 import { ShowsComponent } from 'src/app/pages/shows/shows.component';
@@ -59,7 +60,10 @@ import { SettingsComponent } from 'src/app/settings/settings/settings.component'
     MatProgressSpinnerModule,
     NgbModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    NbTooltipModule,
+    NbPopoverModule,
+    QRCodeModule
   ],
   declarations: [
     DashboardComponent,

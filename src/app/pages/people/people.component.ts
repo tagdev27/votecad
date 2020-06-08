@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
-import { LocalDataSource } from 'ng2-smart-table';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, TemplateRef, Input } from '@angular/core';
+import { LocalDataSource, ViewCell } from 'ng2-smart-table';
 import * as firebase from "firebase/app";
 import 'firebase/firestore'
 import 'firebase/database'
@@ -22,6 +22,32 @@ import { People } from 'src/app/models/contestants';
 
 var myFiles: FilePreviewModel[] = [];
 var image_url = ''
+
+@Component({
+    template: `
+  <label class="btn btn-info" data-toggle="tooltip" data-placement="bottom" title="{{renderValue}}">
+  {{shortRenderValue}}
+</label>
+  `,
+})
+
+export class CustomEditorComponent implements ViewCell, OnInit {
+
+    renderValue: string = '';
+    shortRenderValue: string | number = ''
+    config = new AppConfig()
+
+    @Input() value: string | number;
+    @Input() rowData: any;
+
+    ngOnInit() {
+        this.renderValue = this.value.toString();
+        this.shortRenderValue = this.config.shortenLargeNumber(Number(this.renderValue))
+        // console.log(this.renderValue)
+    }
+
+}
+
 
 @Component({
     selector: 'app-people',
@@ -67,7 +93,17 @@ export class PeopleComponent implements OnInit {
             },
             vote: {
                 title: 'Number of Votes',
+                type: 'custom',
+                renderComponent: CustomEditorComponent
+            },
+            avg: {
+                title: 'Average Rating',
                 type: 'string',
+            },
+            rating: {
+                title: 'Total Ratings',
+                type: 'custom',
+                renderComponent: CustomEditorComponent
             },
             created: {
                 title: 'Created Date',
@@ -102,6 +138,7 @@ export class PeopleComponent implements OnInit {
     main_user_type = ''//admin,agent,school
     main_user_role_type = ''//owner or staff
 
+    qrcode_data = ''
     model_image = ''
     model_name = ''
     model_event = ''
@@ -110,12 +147,14 @@ export class PeopleComponent implements OnInit {
     model_twitter_url = 'https://'
     model_instagram_url = 'https://'
     model_youtube_url = 'https://'
+    model_tiktok_url = 'https://'
     model_video_urls: string[] = []
     model_more_info: any[] = []
     model_views = 0
     model_voting_count = 0
     model_vote_type = ''
     model_link = 0
+    model_capped = 0
 
     editor(ev) {
         this.model_desc = ev
@@ -163,7 +202,7 @@ export class PeopleComponent implements OnInit {
                 query.forEach(data => {
                     const s = <People>data.data()
                     this.people.push(s)
-                    this.data.push({ 'id': `${index}`, 'vote': `${this.config.shortenLargeNumber(s.voting_counts)}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                    this.data.push({ 'id': `${index}`, 'vote': `${s.voting_counts}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'avg': `${s.avgRating}`, 'rating': `${s.numRatings}` })
                     index = index + 1
                 })
                 this.source.load(this.data)
@@ -177,7 +216,7 @@ export class PeopleComponent implements OnInit {
             query.forEach(data => {
                 const s = <People>data.data()
                 this.people.push(s)
-                this.data.push({ 'id': `${index}`, 'vote': `${this.config.shortenLargeNumber(s.voting_counts)}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                this.data.push({ 'id': `${index}`, 'vote': `${s.voting_counts}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date, 'avg': `${s.avgRating}`, 'rating': `${s.numRatings}` })
                 index = index + 1
             })
             this.source.load(this.data)
@@ -223,6 +262,7 @@ export class PeopleComponent implements OnInit {
 
     cancelAddUser() {
         this.display_users = true
+        this.qrcode_data = ''
         this.model_image = ''
         this.model_name = ''
         this.model_event = ''
@@ -231,12 +271,14 @@ export class PeopleComponent implements OnInit {
         this.model_twitter_url = 'https://'
         this.model_instagram_url = 'https://'
         this.model_youtube_url = 'https://'
+        this.model_tiktok_url = 'https://'
         this.model_video_urls = []
         this.model_more_info = []
         this.model_views = 0
         this.model_voting_count = 0
         this.model_vote_type = ''
         this.model_link = 0
+        this.model_capped = 0
         this.isAdd = true
         myFiles = []
         image_url = ''
@@ -251,13 +293,19 @@ export class PeopleComponent implements OnInit {
     async registerUser() {
         if (this.isAdd) {
             if (myFiles.length == 0) {
-                this.config.displayMessage("Please enter all fields markedd with * and upload images", false)
+                this.config.displayMessage("Please enter all fields marked with * and upload images", false)
                 return
             }
         }
-        if (this.model_name == '' || this.model_event == '' || this.model_desc == '') {
-            this.config.displayMessage("Please enter all fields markedd with *.", false)
+        if (this.model_name == '' || this.model_event == '' || this.model_desc == '' || this.model_vote_type == '') {
+            this.config.displayMessage("Please enter all fields marked with *.", false)
             return
+        }
+        if (this.model_vote_type == 'capped-per-day' || this.model_vote_type == 'total-vote-capped') {
+            if (this.model_capped == 0 || this.model_capped == null) {
+                this.config.displayMessage("Please enter number of capped vote.", false)
+                return
+            }
         }
         if (this.model_video_urls.length == 0) {
             this.config.displayMessage("Please add at least one youtube video link.", false)
@@ -270,7 +318,7 @@ export class PeopleComponent implements OnInit {
         this.button_pressed = true
         const key = firebase.database().ref().push().key
 
-        const link = (this.isAdd) ? this.randomInt(1, 9999999999) : this.model_link
+        const link = (this.isAdd) ? this.randomInt(1, 99999999999) : this.model_link
 
         const dynamic_link = await this.config.createDynamicLink(this.http, this.model_name, this.model_desc, `https://votecad.com/events/${this.getShowNameByID(this.model_event)}/contestant/${link}`, image_url)
 
@@ -286,20 +334,25 @@ export class PeopleComponent implements OnInit {
             twitter_page_url: this.model_twitter_url,
             instagram_page_url: this.model_instagram_url,
             youtube_page_url: this.model_youtube_url,
+            tiktok_page_url: this.model_tiktok_url,
             views: (this.isAdd) ? 0 : this.model_views,
             vote_type: this.model_vote_type,
+            capped_vote_number: this.model_capped,
             share_url: dynamic_link['shortLink'],
             voting_counts: (this.isAdd) ? 0 : this.model_voting_count,
             approved: true,
             modified_date: `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
         }
         if (this.isAdd) {
+            people.avgRating = 0
+            people.numRatings = 0
             people.link = link
             people.created_date = `${new Date().toLocaleDateString()} - ${new Date().toLocaleTimeString()}`,
-            people.created_by = this.main_user_id
+                people.created_by = this.main_user_id
             people.timestamp = firebase.firestore.FieldValue.serverTimestamp()
             firebase.firestore().collection('contestants').doc(key).set(people).then(d => {
                 this.config.logActivity(`${this.current_name}|${this.current_email} created this contestant: ${this.model_name}`)
+                this.config.counterOperations('cont', 1)
                 this.config.displayMessage(`Contestants created successfully.`, true);
                 this.cancelAddUser()
             }).catch(err => {
@@ -322,11 +375,12 @@ export class PeopleComponent implements OnInit {
     editUser(user: any) {
         this.selectedID = `${user.data.userID}`
         const s = this.people.filter((item, index, arr) => {
-            return item.id = this.selectedID
+            return item.id == this.selectedID
         })
         this.selectedPeople = s[0]
         this.display_users = false
         this.isAdd = false
+        this.qrcode_data = this.selectedPeople.share_url
         image_url = this.selectedPeople.image
         this.model_name = this.selectedPeople.name
         this.model_event = this.selectedPeople.event
@@ -335,12 +389,14 @@ export class PeopleComponent implements OnInit {
         this.model_twitter_url = this.selectedPeople.twitter_page_url
         this.model_instagram_url = this.selectedPeople.instagram_page_url
         this.model_youtube_url = this.selectedPeople.youtube_page_url
+        this.model_tiktok_url = this.selectedPeople.tiktok_page_url
         this.model_video_urls = this.selectedPeople.video_urls
         this.model_more_info = this.selectedPeople.more_information
         this.model_views = this.selectedPeople.views
         this.model_voting_count = this.selectedPeople.voting_counts
         this.model_vote_type = this.selectedPeople.vote_type
         this.model_link = this.selectedPeople.link
+        this.model_capped = this.selectedPeople.capped_vote_number
     }
 
     deleteUser(user: any) {
@@ -359,6 +415,7 @@ export class PeopleComponent implements OnInit {
             if (result.value) {
                 firebase.firestore().collection('contestants').doc(id).delete().then(del => {
                     this.config.logActivity(`${this.current_name}|${this.current_email} deleted this contestant: ${this.model_name}`)
+                    this.config.counterOperations('cont', -1)
                     this.config.displayMessage("Successfully deleted", true);
                 }).catch(err => {
                     this.config.displayMessage(`${err}`, false);

@@ -51,7 +51,7 @@ export class RegisterComponent implements OnInit {
         name: name,
         position: position,
         image: 'assets/img/default-avatar.png',
-        role: 'Agents',
+        role: 'Organizers',
         access_levels: '',
         blocked: false,
         approved: false,
@@ -62,6 +62,7 @@ export class RegisterComponent implements OnInit {
       }
 
       firebase.firestore().collection('db').doc('votecad').collection('users').doc(email).set(new_user).then(d => {
+        this.config.counterOperations('org', 1)
         firebase.auth().signOut()
         this.login_pressed = false;
         this.config.displayMessage('Registration successful. An email will be sent to you upon approval.', true)

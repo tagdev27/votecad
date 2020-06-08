@@ -18,13 +18,35 @@
 
                     <nb-card>
 
-                        <nb-card-body *ngIf="display_users">
+                        <nb-card-body *ngIf="display_users && !viewStatChart">
                             <ng2-smart-table [settings]="settings" [source]="source" (create)="addUser()"
                                 (edit)="editUser($event)" (delete)="deleteUser($event)">
                             </ng2-smart-table>
                         </nb-card-body>
 
-                        <nb-card-body *ngIf="!display_users">
+                        <nb-card-body *ngIf="viewStatChart">
+                            <div class="card shadow">
+                                <div class="card-header bg-transparent">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="text-uppercase text-muted ls-1 mb-1">VOTING ANALYSIS</h6>
+                                            <h2 class="mb-0">{{selected_event_name}}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Chart -->
+                                    <div class="chart">
+                                        <canvas id="chart-orders" class="chart-canvas"></canvas>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" (click)="closeChart()">Close</button>
+                                </div>
+                            </div>
+                        </nb-card-body>
+
+                        <nb-card-body *ngIf="!display_users && !viewStatChart">
                             <form>
                                 <div class="container">
                                     <div class="row">
@@ -56,15 +78,20 @@
                                             </div>
                                             <br>
                                         </div>
+                                        <div class="col-lg" *ngIf="qrcode_data != ''">
+                                            <br><br>
+                                            <qrcode [qrdata]="qrcode_data" width="256" errorCorrectionLevel="M"></qrcode>
+                                        </div>
                                     </div>
                                     <br>
                                     <div class="row">
                                         <div class="col-lg">
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Event Name *</label>
-                                                <input type="text" class="form-control form-control-alternative"
-                                                    name="model_name" [(ngModel)]="model_name" placeholder="Event Name"
-                                                    autofocus status="primary">
+                                                <input [disabled]="model_approved == 'true'" type="text"
+                                                    class="form-control form-control-alternative" name="model_name"
+                                                    [(ngModel)]="model_name" placeholder="Event Name" autofocus
+                                                    status="primary">
                                             </div>
                                         </div>
                                         <div class="col-lg">
@@ -81,7 +108,8 @@
                                         <div class="col-lg">
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Event Start Date *</label>
-                                                <input type="date" class="form-control form-control-alternative"
+                                                <input type="datetime-local"
+                                                    class="form-control form-control-alternative"
                                                     name="model_start_date" [(ngModel)]="model_start_date"
                                                     placeholder="Event Start Date" autofocus status="primary">
                                             </div>
@@ -89,9 +117,10 @@
                                         <div class="col-lg">
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Event End Date *</label>
-                                                <input type="date" class="form-control form-control-alternative"
-                                                    name="model_end_date" [(ngModel)]="model_end_date"
-                                                    placeholder="Event End Date" autofocus status="primary">
+                                                <input type="datetime-local"
+                                                    class="form-control form-control-alternative" name="model_end_date"
+                                                    [(ngModel)]="model_end_date" placeholder="Event End Date" autofocus
+                                                    status="primary">
                                             </div>
                                         </div>
                                     </div>
@@ -127,12 +156,22 @@
                                                     placeholder="Event Instagram Page" autofocus status="primary">
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-lg">
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Event Youtube Page</label>
                                                 <input type="url" class="form-control form-control-alternative"
                                                     name="eyp" [(ngModel)]="model_youtube_url" value="https://"
                                                     placeholder="Event Youtube Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event TikTok Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="etkp" [(ngModel)]="model_tiktok_url" value="https://"
+                                                    placeholder="Event TikTok Page" autofocus status="primary">
                                             </div>
                                         </div>
                                     </div>
@@ -161,6 +200,32 @@
                                         </div>
                                         <div class="col-lg"></div>
                                     </div>
+                                    <br>
+                                    <div class="row"
+                                        *ngIf="main_user_type == 'admin' && main_user_role_type == 'owner'">
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Approved</label>
+                                                <select class="form-control form-control-alternative"
+                                                    [(ngModel)]="model_approved" placeholder="" name="ma"
+                                                    status="primary">
+                                                    <option value="true">True</option>
+                                                    <option value="false">False</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Verified</label>
+                                                <select class="form-control form-control-alternative"
+                                                    [(ngModel)]="model_verified" placeholder="" name="mv"
+                                                    status="primary">
+                                                    <option value="true">True</option>
+                                                    <option value="false">False</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <br><br>
                                     <button [disabled]="button_pressed" class="btn btn-success"
                                         (click)="registerUser()">
@@ -172,23 +237,6 @@
                                 </div>
                             </form>
                         </nb-card-body>
-
-                        <div class="card shadow">
-                            <div class="card-header bg-transparent">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <h6 class="text-uppercase text-muted ls-1 mb-1">VOTING ANALYSIS</h6>
-                                        <h2 class="mb-0">{{selected_event_name}}</h2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <!-- Chart -->
-                                <div class="chart">
-                                    <canvas id="chart-orders" class="chart-canvas"></canvas>
-                                </div>
-                            </div>
-                        </div>
                     </nb-card>
 
                 </div>

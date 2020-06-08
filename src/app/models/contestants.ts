@@ -10,10 +10,14 @@ export interface People {
     twitter_page_url: string
     instagram_page_url: string
     youtube_page_url: string
+    tiktok_page_url:string
     views: number
     voting_counts: number
     vote_type: string
+    capped_vote_number:number
     link?: number
+    avgRating?: number
+    numRatings?: number
     share_url:string
     approved: boolean
     created_by?: number//id of the agent/school

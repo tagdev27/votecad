@@ -49,7 +49,7 @@ export const AdminLayoutRoutes: Routes = [
         canActivate: [RouteGuard]
     },
     {
-        path: 'merchants',
+        path: 'organizers',
         component: MerchantsComponent,
         canActivate: [RouteGuard]
     },

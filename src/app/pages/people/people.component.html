@@ -42,6 +42,10 @@
                                             </div>
                                             <br>
                                         </div>
+                                        <div class="col-lg" *ngIf="qrcode_data != ''">
+                                            <br><br>
+                                            <qrcode [qrdata]="qrcode_data" width="256" errorCorrectionLevel="M"></qrcode>
+                                        </div>
                                     </div>
                                     <br>
                                     <div class="row">
@@ -68,17 +72,26 @@
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Voting Type per User *</label>
                                                 <select class="form-control form-control-alternative"
-                                                    [(ngModel)]="model_vote_type" placeholder="Voting Type" name="vt"
-                                                    ariaLabel="shows[0]" status="primary">
+                                                    [(ngModel)]="model_vote_type" placeholder="Voting Type" name="vt" status="primary">
                                                     <option value="unlimited">Unlimited</option>
                                                     <option value="one-time">One Time</option>
+                                                    <option value="capped-per-day">Capped per Day</option>
+                                                    <option value="total-vote-capped">Total Voting Capped</option>
                                                 </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg" *ngIf="model_vote_type == 'capped-per-day' || model_vote_type == 'total-vote-capped'">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Number of Capped Votes *</label>
+                                                <input type="number" class="form-control form-control-alternative"
+                                                    name="ncv" [(ngModel)]="model_capped" placeholder="Number of Capped Votes"
+                                                    autofocus status="primary">
                                             </div>
                                         </div>
                                     </div>
                                     <br>
                                     <div class="row">
-                                        <label class="label">Event Description *</label>
+                                        <label class="label">Contestant Description *</label>
                                         <ngx-tiny-mce (editorKeyup)="editor($event)" initValue="{{model_desc}}">
                                         </ngx-tiny-mce>
                                     </div>
@@ -108,12 +121,22 @@
                                                     placeholder="Event Instagram Page" autofocus status="primary">
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-lg">
                                             <div class="form-group">
                                                 <label class="label" for="account_name">Event Youtube Page</label>
                                                 <input type="url" class="form-control form-control-alternative"
                                                     name="eyp" [(ngModel)]="model_youtube_url" value="https://"
                                                     placeholder="Event Youtube Page" autofocus status="primary">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg">
+                                            <div class="form-group">
+                                                <label class="label" for="account_name">Event TikTok Page</label>
+                                                <input type="url" class="form-control form-control-alternative"
+                                                    name="etkp" [(ngModel)]="model_tiktok_url" value="https://"
+                                                    placeholder="Event TikTok Page" autofocus status="primary">
                                             </div>
                                         </div>
                                     </div>

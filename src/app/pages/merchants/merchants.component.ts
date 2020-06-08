@@ -96,6 +96,9 @@ export class MerchantsComponent implements OnInit {
     main_user_type = ''//admin,agent,school
     main_user_role_type = ''//owner or staff
 
+    current_email = localStorage.getItem('email')
+    current_name = localStorage.getItem('name')
+
     @ViewChild('user', { static: false }) private userContainer: ElementRef;//TemplateRef<any>;
 
     constructor(private modalService: NgbModal, private dialogService: NbDialogService, private previewProgressSpinner: OverlayService) {
@@ -182,7 +185,7 @@ export class MerchantsComponent implements OnInit {
             image: 'assets/img/default-avatar.png',
             name: name,
             user_type: this.main_user_type,
-            user_role_type: 'staff',
+            user_role_type: 'owner',
             position: position,
             role: this.accountRole,
             created_by: this.main_user_id,
@@ -216,10 +219,10 @@ export class MerchantsComponent implements OnInit {
         //     this.config.displayMessage("This user can't be deleted", false);
         //     return
         // }
-        const id = `${user.data.userID}`
+        const id = `${user.data.email}`
         swal({
             title: 'Delete Alert',
-            text: 'Are you sure about deleting this user?',
+            text: 'Are you sure about deleting this organizer?',
             type: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete it!',
@@ -230,6 +233,8 @@ export class MerchantsComponent implements OnInit {
         }).then((result) => {
             if (result.value) {
                 firebase.firestore().collection('db').doc('votecad').collection('users').doc(id).delete().then(del => {
+                    this.config.logActivity(`${this.current_name}|${this.current_email} deleted this organizer: ${this.currentUserEmail}`)
+                    this.config.counterOperations('org', -1)
                     this.config.displayMessage("Successfully deleted", true);
                 }).catch(err => {
                     this.config.displayMessage(`${err}`, false);

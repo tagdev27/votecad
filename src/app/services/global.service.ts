@@ -104,4 +104,23 @@ export class AppConfig {
         })
         return formatter.format(value)
     }
+
+    async counterOperations(type: string, value: number) {
+        const ref = firebase.firestore().collection('db').doc('votecad').collection('settings').doc('counter')
+        if (type == 'amt') {//front-end
+            await ref.update({ 'total_amt_generated': firebase.firestore.FieldValue.increment(value) })
+        } else if (type == 'cont') {
+            await ref.update({ 'total_contestants': firebase.firestore.FieldValue.increment(value) })
+        } else if (type == 'evt') {
+            await ref.update({ 'total_events': firebase.firestore.FieldValue.increment(value) })
+        } else if (type == 'org') {
+            await ref.update({ 'total_organizers': firebase.firestore.FieldValue.increment(value) })
+        } else if (type == 'usr') {//front-end
+            await ref.update({ 'total_users': firebase.firestore.FieldValue.increment(value) })
+        }
+        //  else { //front-end
+        //     ref.update({'total_voting_credits': firebase.firestore.FieldValue.increment(value)})
+        // }
+
+    }
 }

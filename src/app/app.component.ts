@@ -29,6 +29,9 @@ export class AppComponent implements OnInit {
       if (userData) {
         this.isLoggedIn = true;
         localStorage.setItem('logged', 'true');
+        if (this.email == '') {
+          this.logUserOut(true)
+        }
       } else {
         localStorage.setItem('logged', 'false');
         if (this.isLogout) {
