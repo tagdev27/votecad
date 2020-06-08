@@ -15,9 +15,7 @@
                     <h3 class="mb-0">Admin Roles</h3>
                 </div>
                 <div class="card-body">
-
                     <nb-card>
-
                         <nb-card-body>
                             <ng2-smart-table [settings]="settings" [source]="source" (create)="addRole()"
                                 (edit)="editRole($event)" (delete)="deleteRole($event)">
@@ -30,35 +28,58 @@
         </div>
     </div>
 </div>
-<ng-template #role let-data let-ref="dialogRef">
-    <nb-card>
-        <nb-card-header *ngIf="isAddRole">Add a new role</nb-card-header>
-        <nb-card-header *ngIf="!isAddRole">Update role</nb-card-header>
-        <nb-card-body>
-            <form>
-                <div class="form-control-group">
-                    <label class="label" for="role_name">Role Name</label>
-                    <br>
-                    <input nbInput placeholder="Role Name" value="{{currentRole.name}}" name="role_nm" id="role_name"
-                        type="text" status="primary">
+<ng-template #role let-c="close" let-d="dismiss">
+    <div class="modal-content">
+        <div class="modal-body">
+            <div class="col-md-12">
+                <div class="card ">
+                    <div class="card-header card-header-rose card-header-icon">
+                        <div class="card-icon">
+                            <!-- <i class="material-icons">mail_outline</i> -->
+                        </div>
+                        <h4 class="card-title" *ngIf="isAddRole">Add a new role</h4>
+                        <h4 class="card-title" *ngIf="!isAddRole">Update role</h4>
+                    </div>
+                    <div class="card-body ">
+                        <form>
+                            <div class="form-group">
+                                <label class="label" for="role_name">Role Name</label>
+                                <br>
+                                <input class="form-control form-control-alternative" placeholder="Role Name"
+                                    value="{{currentRole.name}}" name="role_nm" id="role_name" type="text"
+                                    status="primary">
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="Levels">Access Levels</label><br>
+                                <!-- <mat-form-field [ngClass]="{'mat-focused':focus1===false}">
+                                    <mat-select focused="true" multiple placeholder="Access Levels" [(ngModel)]="currentLevel" name="Levels" ariaLabel="levels[0]">
+                                        <mat-option *ngFor="let lv of levels" [value]="lv.value">
+                                            {{ lv.viewValue }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field> -->
+                                <select class="form-control form-control-alternative" multiple
+                                    placeholder="Access Levels" [(ngModel)]="currentLevel" name="Levels"
+                                    ariaLabel="levels[0]" status="primary">
+                                    <option *ngFor="let lv of levels" [value]="lv.value">{{lv.viewValue}}</option>
+                                </select>
+                            </div>
+                            <br>
+                            <button [disabled]="button_pressed" type="submit" class="btn btn-success" *ngIf="isAddRole"
+                                (click)="roleButtonAction()">{{!button_pressed ? 'Add' : 'Please wait...'}}</button>
+                            <br>
+                            <button [disabled]="button_pressed" type="submit" class="btn btn-success" *ngIf="!isAddRole"
+                                (click)="roleButtonAction()">{{!button_pressed ? 'Update' : 'Please wait...'}}</button>
+                        </form>
+                    </div>
+                    <!-- <div class="card-footer ">
+          <button mat-raised-button type="submit" class="btn btn-fill btn-rose" (click)="userButtonAction()">Update</button>
+        </div> -->
                 </div>
-                <div class="form-control-group">
-                    <label class="label" for="Levels">Access Levels</label><br>
-                    <nb-select multiple placeholder="Access Levels" [(selected)]="currentLevel" name="Levels"
-                        ariaLabel="levels[0]" status="primary">
-                        <nb-option *ngFor="let lv of levels" [value]="lv.value">{{lv.viewValue}}</nb-option>
-                    </nb-select>
-                </div>
-                <br>
-                <button type="submit" class="btn btn-success" *ngIf="isAddRole"
-                    (click)="roleButtonAction()">Add</button>
-                <br>
-                <button type="submit" class="btn btn-success" *ngIf="!isAddRole"
-                    (click)="roleButtonAction()">Update</button>
-            </form>
-        </nb-card-body>
-        <nb-card-footer>
-            <button class="btn btn-danger" (click)="ref.close()">Close</button>
-        </nb-card-footer>
-    </nb-card>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="c('Close click')">Close</button>
+        </div>
+    </div>
 </ng-template>

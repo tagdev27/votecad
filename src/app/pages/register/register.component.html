@@ -83,13 +83,9 @@
               </div>
             </div> -->
             <div class="text-center">
-              <button (click)="register()" *ngIf="!login_pressed" type="button" class="btn btn-primary mt-4">Create
-                account</button>
-              <div class="loader" *ngIf="login_pressed">
-                <svg class="circular" viewBox="25 25 50 50">
-                  <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
-                </svg>
-              </div>
+              <button type="button" [disabled]="login_pressed" class="btn btn-primary mt-4" (click)="register()">
+                {{!login_pressed ? 'Create account' : 'Please wait...'}}
+              </button>
             </div>
           </form>
         </div>

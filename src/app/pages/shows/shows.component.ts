@@ -127,8 +127,8 @@ export class ShowsComponent implements OnInit, AfterViewInit {
             },
             stat: {
                 title: 'View Stats',
-                type: 'html',
-                // renderComponent: CustomEditorComponent,
+                type: 'custom',
+                renderComponent: CustomEditorComponent,
             }
         },
     };

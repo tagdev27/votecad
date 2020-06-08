@@ -11,18 +11,17 @@ import { AdminUsers } from 'src/app/models/admin.users';
 import { AdminUsersService } from 'src/app/services/admin-users.service';
 import { AppConfig } from 'src/app/services/global.service';
 import { NbDialogService } from '@nebular/theme';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-settings-backend-users',
-    styleUrls: ['./backend-users.component.scss'],
-    templateUrl: './backend-users.component.html',
+    selector: 'app-users',
+    styleUrls: ['./users.component.scss'],
+    templateUrl: './users.component.html',
 })
-export class BackEndUsersComponent implements OnInit {
+export class UsersComponent implements OnInit {
 
     settings = {
         add: {
-            addButtonContent: 'ADD',
+            addButtonContent: '',
             createButtonContent: '<i class="nb-checkmark"></i>',
             cancelButtonContent: '<i class="nb-close"></i>',
         },
@@ -61,10 +60,10 @@ export class BackEndUsersComponent implements OnInit {
                 title: 'Blocked',
                 type: 'string',
             },
-            // approved: {
-            //     title: 'Approved',
-            //     type: 'string',
-            // },
+            approved: {
+                title: 'Approved',
+                type: 'string',
+            },
         },
     };
 
@@ -95,9 +94,9 @@ export class BackEndUsersComponent implements OnInit {
     main_user_type = ''//admin,agent,school
     main_user_role_type = ''//owner or staff
 
-    @ViewChild('user', { static: false }) private userContainer: ElementRef;//TemplateRef<any>;
+    @ViewChild('user', { static: false }) private userContainer: TemplateRef<any>;
 
-    constructor(private modalService: NgbModal, private dialogService: NbDialogService, private previewProgressSpinner: OverlayService) {
+    constructor(private dialogService: NbDialogService, private previewProgressSpinner: OverlayService) {
     }
 
     getUsers() {
@@ -198,7 +197,7 @@ export class BackEndUsersComponent implements OnInit {
             id: key,
             access_levels: searchedRole[0].access_levels,
             blocked: false,
-            approved: true,
+            approved: false,
             email: email.toLowerCase(),
             image: 'assets/img/default-avatar.png',
             name: name,
@@ -225,10 +224,10 @@ export class BackEndUsersComponent implements OnInit {
             this.config.displayMessage("This user can't be edited", false);
             return
         }
-        this.currentUserEmail = user.data.email
+        this.currentUserEmail = user.data.userID
         this.blocked_status = user.data.blocked
         this.accountRole = user.data.role
-        this.open(this.userContainer, '', '')
+        this.open(this.userContainer)
     }
 
     deleteUser(user: any) {
@@ -271,8 +270,7 @@ export class BackEndUsersComponent implements OnInit {
             this.config.displayMessage("All fields must be filled", false)
             return
         }
-        // this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
-        this.button_pressed = true
+        this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
         const ar = this.accountRole
         const searchedRole = this.roles.filter(function (item, index, array) {
             return item.name == ar;
@@ -282,41 +280,18 @@ export class BackEndUsersComponent implements OnInit {
             'role': ar,
             'access_levels': searchedRole[0].access_levels
         }).then(d => {
-            this.button_pressed = false
+            this.previewProgressSpinner.close()
             this.config.displayMessage("User successfully updated.", true);
             this.accountRole = ''
             this.blocked_status = ''
             this.currentUserEmail = ''
-            this.modalService.dismissAll()
         }).catch(err => {
-            this.button_pressed = false
+            this.previewProgressSpinner.close()
             this.config.displayMessage(`${err}`, false);
         })
     }
 
-    open(content, type, modalDimension) {
-        if (modalDimension === 'sm' && type === 'modal_mini') {
-            this.modalService.open(content, { windowClass: 'modal-mini', size: 'sm', centered: true }).result.then((result) => {
-                this.closeResult = 'Closed with: $result';
-            }, (reason) => {
-                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
-            });
-        } else if (modalDimension === '' && type === 'Notification') {
-            this.modalService.open(content, { windowClass: 'modal-danger', centered: true }).result.then((result) => {
-                this.closeResult = 'Closed with: $result';
-            }, (reason) => {
-                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
-            });
-        } else {
-            this.modalService.open(content, { centered: true }).result.then((result) => {
-                this.closeResult = 'Closed with: $result';
-            }, (reason) => {
-                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
-            });
-        }
+    open(dialog: TemplateRef<any>) {
+        this.dialogService.open(dialog);
     }
-
-    // open(dialog: TemplateRef<any>) {
-    //     this.dialogService.open(dialog);
-    // }
 }

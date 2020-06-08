@@ -12,7 +12,7 @@
         <div class="col">
             <div class="card shadow">
                 <div class="card-header bg-transparent">
-                    <h3 class="mb-0">{{ display_users ? 'Backend Users' : 'Register a User'}}</h3>
+                    <h3 class="mb-0">{{ display_users ? 'Merchants' : 'Merchants'}}</h3>
                 </div>
                 <div class="card-body">
 
@@ -88,6 +88,15 @@
                                 <label class="label" for="Blocked">Blocked Status</label><br>
                                 <select class="form-control form-control-alternative" [(ngModel)]="blocked_status"
                                     placeholder="Blocked Status" name="Blocked" ariaLabel="blocks_data[0]"
+                                    status="primary">
+                                    <option *ngFor="let bd of blocks_data" [value]="bd.value">{{bd.viewValue}}</option>
+                                </select>
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <label class="label" for="Blocked">Approved Status</label><br>
+                                <select class="form-control form-control-alternative" [(ngModel)]="approved_status"
+                                    placeholder="Approved Status" name="Blocked" ariaLabel="blocks_data[0]"
                                     status="primary">
                                     <option *ngFor="let bd of blocks_data" [value]="bd.value">{{bd.viewValue}}</option>
                                 </select>

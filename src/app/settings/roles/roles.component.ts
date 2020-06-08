@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, TemplateRef, ElementRef } from '@angular/core';
 import * as firebase from "firebase/app";
 import 'firebase/firestore'
 import 'firebase/database'
@@ -11,6 +11,7 @@ import { AppConfig } from 'src/app/services/global.service';
 import { OverlayService } from 'src/app/overlay/overlay.module';
 import { ProgressSpinnerComponent } from 'src/app/progress-spinner/progress-spinner.module';
 import { NbDialogService } from '@nebular/theme';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-settings-roles',
@@ -70,9 +71,11 @@ export class RolesComponent {
     main_user_type = ''//admin,agent,school
     main_user_role_type = ''//owner or staff
 
-    @ViewChild('role', { static: false }) private roleContainer: TemplateRef<any>;
+    closeResult = ''
 
-    constructor(private dialogService: NbDialogService, private previewProgressSpinner: OverlayService) {
+    @ViewChild('role', { static: false }) private roleContainer: ElementRef;//TemplateRef<any>;
+
+    constructor(private modalService: NgbModal, private dialogService: NbDialogService, private previewProgressSpinner: OverlayService) {
     }
 
     getRoles() {
@@ -118,40 +121,42 @@ export class RolesComponent {
     setLevels() {
         if (this.main_user_type == 'admin' && this.main_user_role_type == 'owner') {
             this.levels = [
-                { value: 'Location', viewValue: 'Location' },
-                { value: 'Institution', viewValue: 'Institution' },
-                { value: 'Applications', viewValue: 'Applications' },
-                { value: 'Agents', viewValue: 'Agents' },
-                { value: 'Schools', viewValue: 'Schools' },
-                { value: 'Students', viewValue: 'Students' },
+                { value: 'Shows/Events', viewValue: 'Shows/Events' },
+                { value: 'Contestants', viewValue: 'Contestants' },
+                { value: 'Merchants', viewValue: 'Merchants' },
+                { value: 'Users', viewValue: 'Users' },
+                { value: 'Transactions', viewValue: 'Transactions' },
+                { value: 'Settings', viewValue: 'Settings' },
                 { value: 'Logs', viewValue: 'Logs' },
-                { value: 'Status', viewValue: 'Status' },
-                { value: 'Users and permissions', viewValue: 'Users and permissions' }
+                { value: 'Category', viewValue: 'Category' },
+                { value: 'Slider Settings', viewValue: 'Slider Settings' },
+                { value: 'Roles', viewValue: 'Roles' },
+                { value: 'Backend-Users', viewValue: 'Backend-Users' }
             ];
             return
         }
-        if ((this.main_user_type == 'agent' || this.main_user_type == 'school') && this.main_user_role_type == 'owner') {
+        if (this.main_user_type == 'agent' && this.main_user_role_type == 'owner') {
             this.levels = [
-                { value: 'Applications', viewValue: 'Applications' },
-                { value: 'Students', viewValue: 'Students' },
+                { value: 'Shows/Events', viewValue: 'Shows/Events' },
+                { value: 'Contestants', viewValue: 'Contestants' },
             ];
             return
         }
     }
 
     editRole(role: any) {
-        if (role.data.name == 'Administrator') {
+        if (role.data.name == 'VoteCad-Administrator-Owner') {
             this.config.displayMessage("This role can't be edited", false);
             return
         }
         this.isAddRole = false
         this.currentRole = role.data
         this.currentLevel = role.data.access_levels.split(",")
-        this.open(this.roleContainer)
+        this.open(this.roleContainer, '', '')
     }
 
     deleteRole(role: any) {
-        if (role.data.name == 'Administrator') {
+        if (role.data.name == 'VoteCad-Administrator-Owner') {
             this.config.displayMessage("This role can't be deleted", false);
             return
         }
@@ -189,7 +194,7 @@ export class RolesComponent {
         this.isAddRole = true
         this.currentRole = {}
         this.currentLevel = []
-        this.open(this.roleContainer)
+        this.open(this.roleContainer, '', '')
     }
 
     randomInt(min, max) {
@@ -207,7 +212,8 @@ export class RolesComponent {
             return
         }
         if (this.isAddRole) {
-            this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
+            // this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
+            this.button_pressed = true
             const key = firebase.database().ref().push().key
             const rolePush: RoleUsers = {
                 name: role_name,
@@ -218,34 +224,59 @@ export class RolesComponent {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }
             firebase.firestore().collection('db').doc('votecad').collection('roles').doc(key).set(rolePush).then(d => {
-                this.previewProgressSpinner.close()
+                this.button_pressed = false
                 this.isAddRole = true
                 this.currentLevel = []
                 this.config.displayMessage("Successfully created", true);
+                this.modalService.dismissAll()
             }).catch(err => {
-                this.previewProgressSpinner.close()
+                this.button_pressed = false
                 this.config.displayMessage(`${err}`, false);
             })
         } else {
-            this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
+            // this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
+            this.button_pressed = true
             const key = this.currentRole.userID
             const rolePush = {
                 'name': role_name,
                 'access_levels': this.currentLevel.join(',')
             }
             firebase.firestore().collection('db').doc('votecad').collection('roles').doc(key).update(rolePush).then(d => {
-                this.previewProgressSpinner.close()
+                this.button_pressed = false
                 this.isAddRole = true
                 this.currentLevel = []
                 this.config.displayMessage("Successfully updated", true);
+                this.modalService.dismissAll()
             }).catch(err => {
-                this.previewProgressSpinner.close()
+                this.button_pressed = false
                 this.config.displayMessage(`${err}`, false);
             })
         }
     }
 
-    open(dialog: TemplateRef<any>) {
-        this.dialogService.open(dialog);
+    open(content, type, modalDimension) {
+        if (modalDimension === 'sm' && type === 'modal_mini') {
+            this.modalService.open(content, { windowClass: 'modal-mini', size: 'sm', centered: true }).result.then((result) => {
+                this.closeResult = 'Closed with: $result';
+            }, (reason) => {
+                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
+            });
+        } else if (modalDimension === '' && type === 'Notification') {
+            this.modalService.open(content, { windowClass: 'modal-danger', centered: true }).result.then((result) => {
+                this.closeResult = 'Closed with: $result';
+            }, (reason) => {
+                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
+            });
+        } else {
+            this.modalService.open(content, { centered: true }).result.then((result) => {
+                this.closeResult = 'Closed with: $result';
+            }, (reason) => {
+                this.closeResult = 'Dismissed $this.getDismissReason(reason)';
+            });
+        }
     }
+
+    // open(dialog: TemplateRef<any>) {
+    //     this.dialogService.open(dialog);
+    // }
 }

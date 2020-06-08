@@ -1,0 +1,51 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+        <div class="header-body">
+            <!-- Card stats -->
+            <div class="row">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt--7">
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h3 class="mb-0">General Settings</h3>
+                </div>
+                <div class="card-body">
+
+                    <nb-card>
+
+                        <nb-card-body>
+                            <form>
+                                <div class="form-group">
+                                    <label class="label" for="account_name">How many voting credit equals 1vote?
+                                        *</label>
+                                    <input type="number" class="form-control form-control-alternative" name="model_name"
+                                        [(ngModel)]="model_voting_credit_per_vote" placeholder="" autofocus
+                                        status="primary">
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="position">1 VotingCredit equals how many in Naira (NGN)?
+                                        *</label>
+                                    <input class="form-control form-control-alternative" type="number" name="model_url"
+                                        [(ngModel)]="model_voting_credit_naira" placeholder="" autofocus
+                                        status="primary">
+                                </div>
+                                <br><br>
+                                <button [disabled]="button_pressed" class="btn btn-success" (click)="registerUser()">
+                                    {{!button_pressed ? 'Submit' : 'Saving...'}}
+                                </button>
+                                <!-- <button [disabled]="button_pressed" class="btn btn-danger"
+                                    (click)="cancelAddUser()">Cancel</button> -->
+                            </form>
+                        </nb-card-body>
+                    </nb-card>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

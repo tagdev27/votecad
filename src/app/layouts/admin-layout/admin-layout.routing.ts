@@ -12,6 +12,9 @@ import { CategoryComponent } from 'src/app/settings/category/category.component'
 import { SlidersComponent } from 'src/app/settings/sliders/sliders.component';
 import { ShowsComponent } from 'src/app/pages/shows/shows.component';
 import { PeopleComponent } from 'src/app/pages/people/people.component';
+import { MerchantsComponent } from 'src/app/pages/merchants/merchants.component';
+import { UsersComponent } from 'src/app/pages/users/users.component';
+import { SettingsComponent } from 'src/app/settings/settings/settings.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard', component: DashboardComponent },
@@ -43,6 +46,21 @@ export const AdminLayoutRoutes: Routes = [
     {
         path: 'contestants',
         component: PeopleComponent,
+        canActivate: [RouteGuard]
+    },
+    {
+        path: 'merchants',
+        component: MerchantsComponent,
+        canActivate: [RouteGuard]
+    },
+    {
+        path: 'users',
+        component: UsersComponent,
+        canActivate: [RouteGuard]
+    },
+    {
+        path: 'settings',
+        component: SettingsComponent,
         canActivate: [RouteGuard]
     },
     { 

@@ -61,14 +61,9 @@
               </label>
             </div> -->
             <div class="text-center">
-              <button type="button" (click)="login()" *ngIf="!login_pressed" class="btn btn-primary my-4">Sign
-                in</button>
-              <!-- <mat-spinner color="#5e72e4"></mat-spinner> -->
-              <div class="loader" *ngIf="login_pressed || forgot_pressed">
-                <svg class="circular" viewBox="25 25 50 50">
-                  <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10" />
-                </svg>
-              </div>
+              <button type="button" [disabled]="login_pressed" class="btn btn-primary my-4" (click)="login()">
+                {{!login_pressed ? 'Sign in' : 'Please wait...'}}
+              </button>
             </div>
           </form>
         </div>

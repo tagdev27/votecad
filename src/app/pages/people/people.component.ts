@@ -163,7 +163,7 @@ export class PeopleComponent implements OnInit {
                 query.forEach(data => {
                     const s = <People>data.data()
                     this.people.push(s)
-                    this.data.push({ 'id': `${index}`, 'vote': `${s.voting_counts}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                    this.data.push({ 'id': `${index}`, 'vote': `${this.config.shortenLargeNumber(s.voting_counts)}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
                     index = index + 1
                 })
                 this.source.load(this.data)
@@ -177,7 +177,7 @@ export class PeopleComponent implements OnInit {
             query.forEach(data => {
                 const s = <People>data.data()
                 this.people.push(s)
-                this.data.push({ 'id': `${index}`, 'vote': `${s.voting_counts}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
+                this.data.push({ 'id': `${index}`, 'vote': `${this.config.shortenLargeNumber(s.voting_counts)}`, 'event': this.getShowNameByID(s.event), 'userID': s.id, 'name': s.name, 'image': `<div class="card-profile-image1"><img src="${s.image}" class="rounded-circle"></div>`, 'created': s.created_date, 'modified': s.modified_date })
                 index = index + 1
             })
             this.source.load(this.data)

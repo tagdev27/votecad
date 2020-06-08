@@ -14,15 +14,15 @@ import { NbDialogService } from '@nebular/theme';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'app-settings-backend-users',
-    styleUrls: ['./backend-users.component.scss'],
-    templateUrl: './backend-users.component.html',
+    selector: 'app-merchants',
+    styleUrls: ['./merchants.component.scss'],
+    templateUrl: './merchants.component.html',
 })
-export class BackEndUsersComponent implements OnInit {
+export class MerchantsComponent implements OnInit {
 
     settings = {
         add: {
-            addButtonContent: 'ADD',
+            addButtonContent: '',
             createButtonContent: '<i class="nb-checkmark"></i>',
             cancelButtonContent: '<i class="nb-close"></i>',
         },
@@ -61,10 +61,10 @@ export class BackEndUsersComponent implements OnInit {
                 title: 'Blocked',
                 type: 'string',
             },
-            // approved: {
-            //     title: 'Approved',
-            //     type: 'string',
-            // },
+            approved: {
+                title: 'Approved',
+                type: 'string',
+            },
         },
     };
 
@@ -86,6 +86,7 @@ export class BackEndUsersComponent implements OnInit {
     button_pressed = false
 
     blocked_status: string = '';
+    approved_status: string = '';
     blocks_data = [
         { value: 'false', viewValue: 'False' },
         { value: 'true', viewValue: 'True' },
@@ -101,22 +102,7 @@ export class BackEndUsersComponent implements OnInit {
     }
 
     getUsers() {
-        if (this.main_user_type == 'admin' && this.main_user_role_type == 'owner') {
-            firebase.firestore().collection('db').doc('votecad').collection('users').where('user_type', '==', 'admin').onSnapshot(query => {
-                this.data = []
-                this.users = []
-                var index = 0
-                query.forEach(data => {
-                    const user = <AdminUsers>data.data()
-                    this.users.push(user)
-                    this.data.push({ 'id': `${index + 1}`, 'userID': user.id, 'name': user.name, 'email': user.email, 'position': user.position, 'role': user.role, 'access_levels': user.access_levels, 'blocked': `${user.blocked}`, 'approved': `${user.approved}` })
-                    index = index + 1
-                })
-                this.source.load(this.data)
-            })
-            return
-        }
-        firebase.firestore().collection('db').doc('votecad').collection('users').where('created_by', '==', this.main_user_id).onSnapshot(query => {
+        firebase.firestore().collection('db').doc('votecad').collection('users').where('user_type', '==', 'agent').where('user_role_type', '==', 'owner').onSnapshot(query => {
             this.data = []
             this.users = []
             var index = 0
@@ -141,13 +127,6 @@ export class BackEndUsersComponent implements OnInit {
             });
             return
         }
-        firebase.firestore().collection('db').doc('votecad').collection('roles').where('created_by', '==', this.main_user_id).get().then(query => {
-            this.roles = []
-            query.forEach(data => {
-                const role = <RoleUsers>data.data()
-                this.roles.push(role)
-            })
-        });
     }
 
 
@@ -198,7 +177,7 @@ export class BackEndUsersComponent implements OnInit {
             id: key,
             access_levels: searchedRole[0].access_levels,
             blocked: false,
-            approved: true,
+            approved: false,
             email: email.toLowerCase(),
             image: 'assets/img/default-avatar.png',
             name: name,
@@ -221,21 +200,22 @@ export class BackEndUsersComponent implements OnInit {
     }
 
     editUser(user: any) {
-        if (user.data.role == 'VoteCad-Administrator-Owner') {
-            this.config.displayMessage("This user can't be edited", false);
-            return
-        }
+        // if (user.data.role == 'VoteCad-Administrator-Owner') {
+        //     this.config.displayMessage("This user can't be edited", false);
+        //     return
+        // }
         this.currentUserEmail = user.data.email
         this.blocked_status = user.data.blocked
+        this.approved_status = user.data.approved
         this.accountRole = user.data.role
         this.open(this.userContainer, '', '')
     }
 
     deleteUser(user: any) {
-        if (user.data.role == 'VoteCad-Administrator-Owner') {
-            this.config.displayMessage("This user can't be deleted", false);
-            return
-        }
+        // if (user.data.role == 'VoteCad-Administrator-Owner') {
+        //     this.config.displayMessage("This user can't be deleted", false);
+        //     return
+        // }
         const id = `${user.data.userID}`
         swal({
             title: 'Delete Alert',
@@ -271,7 +251,6 @@ export class BackEndUsersComponent implements OnInit {
             this.config.displayMessage("All fields must be filled", false)
             return
         }
-        // this.previewProgressSpinner.open({ hasBackdrop: true }, ProgressSpinnerComponent);
         this.button_pressed = true
         const ar = this.accountRole
         const searchedRole = this.roles.filter(function (item, index, array) {
@@ -279,6 +258,7 @@ export class BackEndUsersComponent implements OnInit {
         })
         firebase.firestore().collection('db').doc('votecad').collection('users').doc(this.currentUserEmail).update({
             'blocked': (this.blocked_status == 'true') ? true : false,
+            'approved': (this.approved_status == 'true') ? true : false,
             'role': ar,
             'access_levels': searchedRole[0].access_levels
         }).then(d => {
@@ -286,6 +266,7 @@ export class BackEndUsersComponent implements OnInit {
             this.config.displayMessage("User successfully updated.", true);
             this.accountRole = ''
             this.blocked_status = ''
+            this.approved_status = ''
             this.currentUserEmail = ''
             this.modalService.dismissAll()
         }).catch(err => {
