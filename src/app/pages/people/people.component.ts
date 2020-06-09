@@ -352,9 +352,12 @@ export class PeopleComponent implements OnInit {
             people.timestamp = firebase.firestore.FieldValue.serverTimestamp()
             firebase.firestore().collection('contestants').doc(key).set(people).then(d => {
                 this.config.logActivity(`${this.current_name}|${this.current_email} created this contestant: ${this.model_name}`)
-                this.config.counterOperations('cont', 1)
-                this.config.displayMessage(`Contestants created successfully.`, true);
-                this.cancelAddUser()
+                this.config.counterOperations('cont', 1).then(d => {
+                    this.config.createCounter(firebase.firestore().collection('contestants').doc(key), 10).then(d => {
+                        this.config.displayMessage(`Contestants created successfully.`, true);
+                        this.cancelAddUser()
+                    })
+                })
             }).catch(err => {
                 this.button_pressed = false
                 this.config.displayMessage(`${err}`, false);
@@ -374,6 +377,19 @@ export class PeopleComponent implements OnInit {
 
     editUser(user: any) {
         this.selectedID = `${user.data.userID}`
+        this.config.getCount(firebase.firestore().collection('contestants').doc(this.selectedID)).then(val => {
+            console.log(val)
+        })
+        return
+        // console.log(`start time === ${new Date().toLocaleTimeString()}`)
+
+        // for(var i = 0; i <= 10000; i++){
+        //     this.config.incrementCounter(firebase.firestore().collection('contestants').doc(this.selectedID), 8)
+        //     if(i == 10000){
+        //         console.log(`end time === ${new Date().toLocaleTimeString()}`)
+        //     }
+        // }
+        // return
         const s = this.people.filter((item, index, arr) => {
             return item.id == this.selectedID
         })

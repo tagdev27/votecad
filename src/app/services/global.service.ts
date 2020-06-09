@@ -105,22 +105,56 @@ export class AppConfig {
         return formatter.format(value)
     }
 
-    async counterOperations(type: string, value: number) {
+    counterOperations(type: string, value: number) {
         const ref = firebase.firestore().collection('db').doc('votecad').collection('settings').doc('counter')
         if (type == 'amt') {//front-end
-            await ref.update({ 'total_amt_generated': firebase.firestore.FieldValue.increment(value) })
+            return ref.update({ 'total_amt_generated': firebase.firestore.FieldValue.increment(value) })
         } else if (type == 'cont') {
-            await ref.update({ 'total_contestants': firebase.firestore.FieldValue.increment(value) })
+            return ref.update({ 'total_contestants': firebase.firestore.FieldValue.increment(value) })
         } else if (type == 'evt') {
-            await ref.update({ 'total_events': firebase.firestore.FieldValue.increment(value) })
+            return ref.update({ 'total_events': firebase.firestore.FieldValue.increment(value) })
         } else if (type == 'org') {
-            await ref.update({ 'total_organizers': firebase.firestore.FieldValue.increment(value) })
+            return ref.update({ 'total_organizers': firebase.firestore.FieldValue.increment(value) })
         } else if (type == 'usr') {//front-end
-            await ref.update({ 'total_users': firebase.firestore.FieldValue.increment(value) })
+            return ref.update({ 'total_users': firebase.firestore.FieldValue.increment(value) })
         }
-        //  else { //front-end
-        //     ref.update({'total_voting_credits': firebase.firestore.FieldValue.increment(value)})
-        // }
+         else { //front-end
+            return ref.update({'total_voting_credits': firebase.firestore.FieldValue.increment(value)})
+        }
 
+    }
+
+    createCounter(ref:firebase.firestore.DocumentReference, num_shards:number) {
+        var batch = firebase.firestore().batch();
+        // Initialize the counter document
+        batch.update(ref, { num_shards: num_shards });
+        // Initialize each shard with count=0
+        for (let i = 0; i < num_shards; i++) {
+            let shardRef = ref.collection('shards').doc(i.toString());
+            batch.set(shardRef, { count: 0 });
+        }
+        // Commit the write batch
+        return batch.commit();
+    }
+
+    incrementCounter(ref:firebase.firestore.DocumentReference, num_shards:number) {
+        // Select a shard of the counter at random
+        const shard_id = Math.floor(Math.random() * num_shards).toString();
+        const shard_ref = ref.collection('shards').doc(shard_id);
+    
+        // Update countdag
+        return shard_ref.update("count", firebase.firestore.FieldValue.increment(1));
+    }
+
+    getCount(ref:firebase.firestore.DocumentReference) {
+        // Sum the count of each shard in the subcollection
+        return ref.collection('shards').get().then(snapshot => {
+            let total_count = 0;
+            snapshot.forEach(doc => {
+                total_count += doc.data().count;
+            });
+    
+            return total_count;
+        });
     }
 }
