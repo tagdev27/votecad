@@ -5,6 +5,7 @@ export interface AdminUsers {
     position:string
     image:string
     role:string
+    voting_credit?:number
     access_levels:string
     blocked:boolean
     approved:boolean

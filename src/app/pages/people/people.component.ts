@@ -377,10 +377,10 @@ export class PeopleComponent implements OnInit {
 
     editUser(user: any) {
         this.selectedID = `${user.data.userID}`
-        this.config.getCount(firebase.firestore().collection('contestants').doc(this.selectedID)).then(val => {
-            console.log(val)
-        })
-        return
+        // this.config.getCount(firebase.firestore().collection('contestants').doc(this.selectedID)).then(val => {
+        //     console.log(val)
+        // })
+        // return
         // console.log(`start time === ${new Date().toLocaleTimeString()}`)
 
         // for(var i = 0; i <= 10000; i++){
